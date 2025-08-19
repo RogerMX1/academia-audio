@@ -1,944 +1,709 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academia Performance - Sistema de Mensagens</title>
-    <style>
-
-        * {
-
-            margin: 0;
-
-            padding: 0;
-
-            box-sizing: border-box;
-
-        }
-
-
-
-        body {
-
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
-            background: #000000;
-
-            color: #FFD700;
-
-            min-height: 100vh;
-
-            overflow-x: hidden;
-
-        }
-
-
-
-        .bg-gradient {
-
-            position: fixed;
-
-            top: 0;
-
-            left: 0;
-
-            width: 100%;
-
-            height: 100%;
-
-            background: radial-gradient(ellipse at center, #1a1a1a 0%, #2c2c2c 35%, #000000 100%);
-
-            z-index: -2;
-
-        }
-
-
-
-        .grid-overlay {
-
-            position: fixed;
-
-            top: 0;
-
-            left: 0;
-
-            width: 100%;
-
-            height: 100%;
-
-            background-image: 
-
-                linear-gradient(rgba(255, 215, 0, 0.02) 1px, transparent 1px),
-
-                linear-gradient(90deg, rgba(255, 215, 0, 0.02) 1px, transparent 1px);
-
-            background-size: 50px 50px;
-
-            z-index: -1;
-
-            animation: gridMove 20s linear infinite;
-
-        }
-
-
-
-        @keyframes gridMove {
-
-            0% { transform: translate(0, 0); }
-
-            100% { transform: translate(50px, 50px); }
-
-        }
-
-
-
-        .container {
-
-            display: grid;
-
-            grid-template-columns: 1fr 400px;
-
-            gap: 2rem;
-
-            max-width: 1400px;
-
-            margin: 0 auto;
-
-            padding: 2rem;
-
-            min-height: 100vh;
-
-            align-items: start;
-
-        }
-
-
-
-        .main-panel {
-
-            background: rgba(10, 10, 10, 0.9);
-
-            border-radius: 16px;
-
-            padding: 2rem;
-
-            border: 1px solid rgba(255, 215, 0, 0.2);
-
-            backdrop-filter: blur(20px);
-
-        }
-
-
-
-        .header {
-
-            text-align: center;
-
-            margin-bottom: 2rem;
-
-        }
-
-
-
-        .logo {
-
-            width: 80px;
-
-            height: 80px;
-
-            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
-
-            border-radius: 20px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            font-size: 2rem;
-
-            margin: 0 auto 1rem;
-
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
-
-            color: #000000;
-
-        }
-
-
-
-        .title {
-
-            font-size: 2rem;
-
-            font-weight: 700;
-
-            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
-
-            -webkit-background-clip: text;
-
-            -webkit-text-fill-color: transparent;
-
-            background-clip: text;
-
-            margin-bottom: 0.5rem;
-
-        }
-
-
-
-        .subtitle {
-
-            color: #888888;
-
-            font-size: 1rem;
-
-        }
-
-
-
-        .controls-grid {
-
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 1rem;
-
-            margin: 2rem 0;
-
-        }
-
-
-
-        .btn {
-
-            background: rgba(10, 10, 10, 0.8);
-
-            border: 1px solid rgba(255, 215, 0, 0.2);
-
-            border-radius: 12px;
-
-            padding: 1rem 1.5rem;
-
-            color: #FFD700;
-
-            font-weight: 600;
-
-            font-size: 0.95rem;
-
-            cursor: pointer;
-
-            transition: all 0.2s ease;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 0.5rem;
-
-            min-height: 60px;
-
-        }
-
-
-
-        .btn:hover {
-
-            background: rgba(255, 215, 0, 0.1);
-
-            transform: translateY(-1px);
-
-            border-color: rgba(255, 215, 0, 0.4);
-
-        }
-
-
-
-        .btn-primary {
-
-            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
-
-            border: none;
-
-            color: #000000;
-
-        }
-
-
-
-        .btn-primary:hover {
-
-            transform: translateY(-2px);
-
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
-
-        }
-
-
-
-        .btn-danger {
-
-            background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%);
-
-            border: none;
-
-            color: #FFD700;
-
-        }
-
-
-
-        .btn-danger:hover {
-
-            transform: translateY(-2px);
-
-            box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
-
-        }
-
-
-
-        .volume-section {
-
-            background: rgba(10, 10, 10, 0.6);
-
-            border-radius: 12px;
-
-            padding: 1.5rem;
-
-            margin: 1.5rem 0;
-
-            border: 1px solid rgba(255, 215, 0, 0.1);
-
-        }
-
-
-
-        .volume-label {
-
-            font-weight: 600;
-
-            margin-bottom: 1rem;
-
-            color: #FFD700;
-
-        }
-
-
-
-        .volume-slider {
-
-            width: 100%;
-
-            height: 6px;
-
-            border-radius: 3px;
-
-            background: rgba(255, 255, 255, 0.1);
-
-            outline: none;
-
-            -webkit-appearance: none;
-
-        }
-
-
-
-        .volume-slider::-webkit-slider-thumb {
-
-            -webkit-appearance: none;
-
-            appearance: none;
-
-            width: 20px;
-
-            height: 20px;
-
-            border-radius: 50%;
-
-            background: #FFD700;
-
-            cursor: pointer;
-
-            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.4);
-
-        }
-
-
-
-        .status-section {
-
-            background: rgba(10, 10, 10, 0.6);
-
-            border-radius: 12px;
-
-            padding: 1.5rem;
-
-            text-align: center;
-
-            border: 1px solid rgba(255, 215, 0, 0.1);
-
-        }
-
-
-
-        .status {
-
-            font-size: 1.1rem;
-
-            font-weight: 600;
-
-            margin-bottom: 1rem;
-
-        }
-
-
-
-        .countdown {
-
-            font-size: 1.8rem;
-
-            font-weight: 700;
-
-            color: #FFD700;
-
-            font-family: 'JetBrains Mono', monospace;
-
-        }
-
-
-
-        .playing {
-
-            animation: pulse-status 2s infinite;
-
-        }
-
-
-
-        @keyframes pulse-status {
-
-            0%, 100% { opacity: 1; }
-
-            50% { opacity: 0.7; }
-
-        }
-
-
-
-        .youtube-panel {
-
-            background: rgba(10, 10, 10, 0.9);
-
-            border-radius: 16px;
-
-            padding: 1.5rem;
-
-            border: 1px solid rgba(255, 215, 0, 0.2);
-
-            backdrop-filter: blur(20px);
-
-            position: sticky;
-
-            top: 2rem;
-
-            height: fit-content;
-
-        }
-
-
-
-        .youtube-header {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 0.75rem;
-
-            margin-bottom: 1rem;
-
-            color: #ff0000;
-
-            font-weight: 600;
-
-        }
-
-
-
-        .youtube-embed {
-
-            width: 100%;
-
-            height: 240px;
-
-            border: none;
-
-            border-radius: 12px;
-
-            background: #000;
-
-        }
-
-
-
-        .info-cards {
-
-            display: grid;
-
-            gap: 1rem;
-
-            margin-top: 1rem;
-
-        }
-
-
-
-        .info-card {
-
-            background: rgba(10, 10, 10, 0.6);
-
-            border: 1px solid rgba(255, 215, 0, 0.1);
-
-            border-radius: 12px;
-
-            padding: 1rem;
-
-        }
-
-
-
-        .info-card h4 {
-
-            color: #FFD700;
-
-            font-size: 0.9rem;
-
-            font-weight: 600;
-
-            margin-bottom: 0.5rem;
-
-        }
-
-
-
-        .info-card p {
-
-            color: #CCCCCC;
-
-            font-size: 0.85rem;
-
-            line-height: 1.4;
-
-        }
-
-
-
-        .shortcuts {
-
-            display: flex;
-
-            gap: 0.5rem;
-
-            flex-wrap: wrap;
-
-        }
-
-
-
-        .shortcut {
-
-            background: rgba(255, 215, 0, 0.1);
-
-            border: 1px solid rgba(255, 215, 0, 0.3);
-
-            border-radius: 6px;
-
-            padding: 0.25rem 0.5rem;
-
-            font-size: 0.75rem;
-
-            color: #FFD700;
-
-            font-weight: 600;
-
-        }
-
-
-
-        @media (max-width: 968px) {
-
-            .container {
-
-                grid-template-columns: 1fr;
-
-                gap: 1rem;
-
-                padding: 1rem;
-
-            }
-
-            
-
-            .controls-grid {
-
-                grid-template-columns: 1fr;
-
-            }
-
-            
-
-            .youtube-panel {
-
-                position: static;
-
-            }
-
-        }
-
-
-
-        .message-preview {
-
-            background: rgba(10, 10, 10, 0.6);
-
-            border: 1px solid rgba(255, 215, 0, 0.1);
-
-            border-radius: 12px;
-
-            padding: 1.5rem;
-
-            margin: 1.5rem 0;
-
-            border-left: 4px solid #FFD700;
-
-        }
-
-
-
-        .message-preview h3 {
-
-            color: #FFD700;
-
-            font-size: 1rem;
-
-            font-weight: 600;
-
-            margin-bottom: 1rem;
-
-        }
-
-
-
-        .message-text {
-
-            color: #CCCCCC;
-
-            line-height: 1.6;
-
-            font-size: 0.9rem;
-
-        }
-
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Performance - Sistema de Mensagens</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000000;
+            color: #FFD700;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a1a1a 0%, #2c2c2c 35%, #000000 100%);
+            z-index: -2;
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 215, 0, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 215, 0, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            align-items: start;
+        }
+
+        .main-panel {
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(20px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            color: #000000;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888888;
+            font-size: 1rem;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .btn {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            color: #FFD700;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 60px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateY(-1px);
+            border-color: rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+            border: none;
+            color: #000000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%);
+            border: none;
+            color: #FFD700;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+        }
+
+        .volume-section {
+            background: rgba(10, 10, 10, 0.6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .volume-label {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #FFD700;
+        }
+
+        .volume-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFD700;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.4);
+        }
+
+        .status-section {
+            background: rgba(10, 10, 10, 0.6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .status {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .countdown {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #FFD700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .playing {
+            animation: pulse-status 2s infinite;
+        }
+
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .youtube-panel {
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .youtube-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: #ff0000;
+            font-weight: 600;
+        }
+
+        .youtube-embed {
+            width: 100%;
+            height: 240px;
+            border: none;
+            border-radius: 12px;
+            background: #000;
+        }
+
+        .info-cards {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-card {
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .info-card h4 {
+            color: #FFD700;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            color: #CCCCCC;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .shortcuts {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .shortcut {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        .message-preview {
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        .message-preview h3 {
+            color: #FFD700;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .message-text {
+            color: #CCCCCC;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .youtube-panel {
+                position: static;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
-    <div class="grid-overlay"></div>
-    
-    <div class="container">
-        <div class="main-panel">
-            <div class="header">
-                <div class="logo">🏋️‍♂️</div>
-                <h1 class="title">Academia Performance</h1>
-                <p class="subtitle">Sistema de Mensagens Automáticas</p>
-            </div>
+    <div class="bg-gradient"></div>
+    <div class="grid-overlay"></div>
+    
+    <div class="container">
+        <div class="main-panel">
+            <div class="header">
+                <div class="logo">🏋️‍♂️</div>
+                <h1 class="title">Academia Performance</h1>
+                <p class="subtitle">Sistema de Mensagens Automáticas</p>
+            </div>
 
-            <div class="controls-grid">
-                <button class="btn btn-primary" id="playBtn" onclick="startAutoPlay()">
-                    ▶️ Iniciar Automático
-                </button>
-                <button class="btn btn-danger" id="stopBtn" onclick="stopAutoPlay()" style="display: none;">
-                    ⏹️ Parar Automático
-                </button>
-                <button class="btn" id="playOnceBtn" onclick="playMessageOnce()">
-                    🔊 Tocar Uma Vez
-                </button>
-                <button class="btn" onclick="toggleYouTubeMusic()">
-                    🎵 Controlar Música
-                </button>
-            </div>
+            <div class="controls-grid">
+                <button class="btn btn-primary" id="playBtn" onclick="startAutoPlay()">
+                    ▶️ Iniciar Automático
+                </button>
+                <button class="btn btn-danger" id="stopBtn" onclick="stopAutoPlay()" style="display: none;">
+                    ⏹️ Parar Automático
+                </button>
+                <button class="btn" id="playOnceBtn" onclick="playMessageOnce()">
+                    🔊 Tocar Uma Vez
+                </button>
+                <button class="btn" onclick="toggleYouTubeMusic()">
+                    🎵 Controlar Música
+                </button>
+            </div>
 
-            <div class="volume-section">
-                <div class="volume-label">Volume da Mensagem</div>
-                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.8" onchange="changeVolume()">
-                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: #888; font-size: 0.85rem;">
-                    <span>0%</span>
-                    <span id="volumeValue">80%</span>
-                    <span>100%</span>
-                </div>
-            </div>
+            <div class="volume-section">
+                <div class="volume-label">Volume da Mensagem</div>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.8" onchange="changeVolume()">
+                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: #888; font-size: 0.85rem;">
+                    <span>0%</span>
+                    <span id="volumeValue">80%</span>
+                    <span>100%</span>
+                </div>
+            </div>
 
-            <div class="status-section">
-                <div class="status" id="status">Sistema pronto para uso</div>
-                <div id="countdown" style="display: none;">
-                    <div style="color: #888; font-size: 0.9rem; margin-bottom: 0.5rem;">Próxima mensagem em:</div>
-                    <div class="countdown" id="timer">15:00</div>
-                </div>
-            </div>
+            <div class="status-section">
+                <div class="status" id="status">Sistema pronto para uso</div>
+                <div id="countdown" style="display: none;">
+                    <div style="color: #888; font-size: 0.9rem; margin-bottom: 0.5rem;">Próxima mensagem em:</div>
+                    <div class="countdown" id="timer">15:00</div>
+                </div>
+            </div>
 
-            <div class="message-preview">
-                <h3>📢 Mensagem Atual</h3>
-                <div class="message-text">
-                    "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!"
-                </div>
-            </div>
+            <div class="message-preview">
+                <h3>📢 Mensagem Atual</h3>
+                <div class="message-text">
+                    "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!"
+                </div>
+            </div>
 
-            <div class="info-cards">
-                <div class="info-card">
-                    <h4>🎯 Como Funciona</h4>
-                    <p>O sistema toca a mensagem imediatamente e depois repete automaticamente a cada 15 minutos. O áudio do YouTube Music será automaticamente reduzido durante a mensagem.</p>
-                </div>
-                <div class="info-card">
-                    <h4>⌨️ Atalhos</h4>
-                    <div class="shortcuts">
-                        <span class="shortcut">ESPAÇO</span>
-                        <span class="shortcut">P</span>
-                        <span class="shortcut">M</span>
-                    </div>
-                    <p style="margin-top: 0.5rem;">ESPAÇO = Iniciar/Parar | P = Tocar Uma Vez | M = Controlar Música</p>
-                </div>
-            </div>
-        </div>
+            <div class="info-cards">
+                <div class="info-card">
+                    <h4>🎯 Como Funciona</h4>
+                    <p>O sistema toca a mensagem em MP3 imediatamente e depois repete automaticamente a cada 15 minutos. O áudio do YouTube Music será automaticamente reduzido durante a mensagem. <strong>Certifique-se de que o arquivo mensagem.mp3 está na mesma pasta.</strong></p>
+                </div>
+                <div class="info-card">
+                    <h4>⌨️ Atalhos</h4>
+                    <div class="shortcuts">
+                        <span class="shortcut">ESPAÇO</span>
+                        <span class="shortcut">P</span>
+                        <span class="shortcut">M</span>
+                    </div>
+                    <p style="margin-top: 0.5rem;">ESPAÇO = Iniciar/Parar | P = Tocar Uma Vez | M = Controlar Música</p>
+                </div>
+            </div>
+        </div>
 
-        <div class="youtube-panel">
-            <div class="youtube-header">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-                YouTube Music
-            </div>
-            
-            <div id="youtubePlayer" class="youtube-embed"></div>
+        <div class="youtube-panel">
+            <div class="youtube-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                YouTube Music
+            </div>
+            
+            <div id="youtubePlayer" class="youtube-embed"></div>
 
-            <div class="info-cards">
-                <div class="info-card">
-                    <h4>🎵 Controle Automático</h4>
-                    <p>Quando uma mensagem tocar, o volume da música será automaticamente reduzido e restaurado após o fim da mensagem.</p>
-                </div>
-                <div class="info-card">
-                    <h4>⚙️ Status da Música</h4>
-                    <p id="musicStatus">Aguardando detecção do player...</p>
-                </div>
-            </div>
-        </div>
-    </div>
+            <div class="info-cards">
+                <div class="info-card">
+                    <h4>🎵 Controle Automático</h4>
+                    <p>Quando uma mensagem tocar, o volume da música será automaticamente reduzido e restaurado após o fim da mensagem.</p>
+                </div>
+                <div class="info-card">
+                    <h4>⚙️ Status da Música</h4>
+                    <p id="musicStatus">Aguardando detecção do player...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        // Este script carrega a API do YouTube
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        
-        // SEU CÓDIGO JavaScript principal
-        let isPlaying = false;
-        let autoPlayInterval;
-        let isAutoPlayActive = false;
-        let audioElement = null;
-        let audioReady = false;
-        let youtubePlayer = null;
+    <script>
+        // Variáveis globais
+        let isPlaying = false;
+        let autoPlayInterval;
+        let countdownInterval;
+        let isAutoPlayActive = false;
+        let audioElement = null;
+        let audioReady = false;
+        let youtubePlayer = null;
 
-        const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
-        const audioUrl = "mensagem.mp3";
+        const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
+        const audioUrl = "mensagem.mp3";
 
-        function onYouTubeIframeAPIReady() {
-            console.log('API do YouTube pronta. Carregando player...');
-            youtubePlayer = new YT.Player('youtubePlayer', {
-                height: '240',
-                width: '100%',
-                playerVars: {
-                    'listType': 'playlist',
-                    'list': 'PLw-VjHDlEOgvFl9wgJjRYpOTzN5-3sKzY',
-                    'enablejsapi': 1,
-                    'autoplay': 1
-                },
-                events: {
-                    'onReady': onPlayerReady
-                }
-            });
-        }
+        // Carrega a API do YouTube
+        function loadYouTubeAPI() {
+            if (typeof YT === 'undefined') {
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                const firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            }
+        }
 
-        function onPlayerReady(event) {
-            document.getElementById('musicStatus').textContent = 'Player do YouTube carregado';
-        }
+        // Callback da API do YouTube
+        window.onYouTubeIframeAPIReady = function() {
+            console.log('API do YouTube pronta. Carregando player...');
+            youtubePlayer = new YT.Player('youtubePlayer', {
+                height: '240',
+                width: '100%',
+                videoId: 'jfKfPfyJRdk', // vídeo de exemplo - você pode alterar
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 1,
+                    'enablejsapi': 1,
+                    'origin': window.location.origin
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onError': onPlayerError
+                }
+            });
+        };
 
-        function lowerYouTubeVolume() {
-            if (youtubePlayer && youtubePlayer.setVolume) {
-                youtubePlayer.setVolume(20);
-                document.getElementById('musicStatus').textContent = 'Volume da música reduzido';
-            }
-        }
+        function onPlayerReady(event) {
+            console.log('Player do YouTube carregado com sucesso');
+            document.getElementById('musicStatus').textContent = 'Player do YouTube carregado';
+        }
 
-        function restoreYouTubeVolume() {
-            if (youtubePlayer && youtubePlayer.setVolume) {
-                youtubePlayer.setVolume(100);
-                document.getElementById('musicStatus').textContent = 'Volume da música restaurado';
-            }
-        }
+        function onPlayerError(event) {
+            console.error('Erro no player do YouTube:', event.data);
+            document.getElementById('musicStatus').textContent = 'Erro ao carregar música';
+        }
 
-        function playMessage() {
-            if (!isPlaying) {
-                lowerYouTubeVolume();
-                if (audioReady && audioElement) {
-                    console.log('Reproduzindo arquivo de áudio');
-                    audioElement.play();
-                } else {
-                    console.log('Usando síntese de voz');
-                    playWithSpeechSynthesis();
-                }
-            }
-        }
+        // Controle do volume da música
+        function lowerYouTubeVolume() {
+            if (youtubePlayer && typeof youtubePlayer.setVolume === 'function') {
+                try {
+                    youtubePlayer.setVolume(20);
+                    document.getElementById('musicStatus').textContent = 'Volume da música reduzido';
+                } catch (e) {
+                    console.log('Erro ao reduzir volume:', e);
+                }
+            }
+        }
 
-        function playWithSpeechSynthesis() {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(mensagem);
-                utterance.lang = 'pt-BR';
-                utterance.rate = 0.9;
-                utterance.pitch = 1;
-                utterance.volume = parseFloat(document.getElementById('volumeSlider').value);
+        function restoreYouTubeVolume() {
+            if (youtubePlayer && typeof youtubePlayer.setVolume === 'function') {
+                try {
+                    youtubePlayer.setVolume(100);
+                    document.getElementById('musicStatus').textContent = 'Volume da música restaurado';
+                } catch (e) {
+                    console.log('Erro ao restaurar volume:', e);
+                }
+            }
+        }
 
-                utterance.onstart = function() {
-                    isPlaying = true;
-                    updateStatus();
-                };
+        // Função principal para tocar mensagem
+        function playMessage() {
+            if (!isPlaying && audioReady && audioElement) {
+                lowerYouTubeVolume();
+                console.log('Reproduzindo arquivo de áudio MP3');
+                audioElement.volume = parseFloat(document.getElementById('volumeSlider').value);
+                audioElement.play().catch(e => {
+                    console.error('Erro ao reproduzir áudio MP3:', e);
+                    alert('Erro ao reproduzir o arquivo mensagem.mp3. Verifique se o arquivo está presente.');
+                    isPlaying = false;
+                    restoreYouTubeVolume();
+                    updateStatus();
+                });
+            } else if (!audioReady) {
+                alert('Arquivo mensagem.mp3 não foi carregado. Verifique se o arquivo está na mesma pasta.');
+            }
+        }
 
-                utterance.onend = function() {
-                    isPlaying = false;
-                    restoreYouTubeVolume();
-                    updateStatus();
-                };
-                
-                speechSynthesis.speak(utterance);
-            }
-        }
+        function stopMessage() {
+            if (isPlaying && audioElement && !audioElement.paused) {
+                audioElement.pause();
+                audioElement.currentTime = 0;
+                isPlaying = false;
+                restoreYouTubeVolume();
+                updateStatus();
+            }
+        }
 
-        function stopMessage() {
-            if (isPlaying) {
-                if (audioElement && !audioElement.paused) {
-                    audioElement.pause();
-                    audioElement.currentTime = 0;
-                } else if ('speechSynthesis' in window) {
-                    speechSynthesis.cancel();
-                }
-                isPlaying = false;
-                restoreYouTubeVolume();
-                updateStatus();
-            }
-        }
+        // Controle do sistema automático
+        function startAutoPlay() {
+            if (!isAutoPlayActive) {
+                isAutoPlayActive = true;
+                document.getElementById('playBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'flex';
+                
+                // Toca imediatamente
+                playMessage();
+                
+                // Inicia contagem regressiva
+                startCountdown();
+            }
+        }
 
-        function startAutoPlay() {
-            if (!isAutoPlayActive) {
-                isAutoPlayActive = true;
-                document.getElementById('playBtn').style.display = 'none';
-                document.getElementById('stopBtn').style.display = 'flex';
-                playMessage();
-                startCountdown();
-            }
-        }
+        function stopAutoPlay() {
+            if (isAutoPlayActive) {
+                isAutoPlayActive = false;
+                
+                // Limpa intervalos
+                if (autoPlayInterval) clearInterval(autoPlayInterval);
+                if (countdownInterval) clearInterval(countdownInterval);
+                
+                // Para mensagem se estiver tocando
+                stopMessage();
+                
+                // Atualiza interface
+                document.getElementById('playBtn').style.display = 'flex';
+                document.getElementById('stopBtn').style.display = 'none';
+                document.getElementById('status').textContent = 'Sistema parado';
+                document.getElementById('countdown').style.display = 'none';
+            }
+        }
 
-        function stopAutoPlay() {
-            if (isAutoPlayActive) {
-                isAutoPlayActive = false;
-                clearInterval(autoPlayInterval);
-                document.getElementById('playBtn').style.display = 'flex';
-                document.getElementById('stopBtn').style.display = 'none';
-                document.getElementById('status').textContent = 'Sistema parado';
-                document.getElementById('countdown').style.display = 'none';
-            }
-        }
+        function playMessageOnce() {
+            playMessage();
+        }
 
-        function playMessageOnce() {
-            playMessage();
-        }
+        // Controle da música do YouTube
+        function toggleYouTubeMusic() {
+            if (youtubePlayer && typeof youtubePlayer.getPlayerState === 'function') {
+                try {
+                    const state = youtubePlayer.getPlayerState();
+                    if (state === YT.PlayerState.PLAYING) {
+                        youtubePlayer.pauseVideo();
+                        document.getElementById('musicStatus').textContent = 'Música pausada';
+                    } else {
+                        youtubePlayer.playVideo();
+                        document.getElementById('musicStatus').textContent = 'Música tocando';
+                    }
+                } catch (e) {
+                    console.log('Erro ao controlar música:', e);
+                }
+            }
+        }
 
-        function updateStatus() {
-            const statusElement = document.getElementById('status');
-            if (isPlaying) {
-                statusElement.textContent = 'Mensagem tocando...';
-                statusElement.classList.add('playing');
-            } else {
-                statusElement.textContent = 'Sistema pronto para uso';
-                statusElement.classList.remove('playing');
-                if (isAutoPlayActive) {
-                    statusElement.textContent = 'Aguardando próxima mensagem...';
-                }
-            }
-        }
+        // Status e interface
+        function updateStatus() {
+            const statusElement = document.getElementById('status');
+            if (isPlaying) {
+                statusElement.textContent = 'Mensagem tocando...';
+                statusElement.classList.add('playing');
+            } else {
+                statusElement.classList.remove('playing');
+                if (isAutoPlayActive) {
+                    statusElement.textContent = 'Aguardando próxima mensagem...';
+                } else {
+                    statusElement.textContent = 'Sistema pronto para uso';
+                }
+            }
+        }
 
-        function startCountdown() {
-            const totalSeconds = 15 * 60;
-            let remainingSeconds = totalSeconds;
-            document.getElementById('countdown').style.display = 'block';
+        // Contagem regressiva
+        function startCountdown() {
+            const totalSeconds = 15 * 60; // 15 minutos
+            let remainingSeconds = totalSeconds;
+            
+            document.getElementById('countdown').style.display = 'block';
+            updateCountdownDisplay(remainingSeconds);
 
-            autoPlayInterval = setInterval(() => {
-                remainingSeconds--;
-                if (remainingSeconds < 0) {
-                    playMessage();
-                    remainingSeconds = totalSeconds;
-                }
-                const minutes = Math.floor(remainingSeconds / 60);
-                const seconds = remainingSeconds % 60;
-                document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }, 1000);
-        }
+            countdownInterval = setInterval(() => {
+                remainingSeconds--;
+                updateCountdownDisplay(remainingSeconds);
+                
+                if (remainingSeconds <= 0) {
+                    playMessage();
+                    remainingSeconds = totalSeconds;
+                }
+            }, 1000);
+        }
 
-        function changeVolume() {
-            const slider = document.getElementById('volumeSlider');
-            const value = Math.round(slider.value * 100);
-            document.getElementById('volumeValue').textContent = `${value}%`;
-        }
+        function updateCountdownDisplay(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            document.getElementById('timer').textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+        }
 
-        function loadAudioFromUrl() {
-            audioElement = new Audio(audioUrl);
-            audioElement.addEventListener('canplaythrough', () => {
-                audioReady = true;
-                console.log('Arquivo de áudio carregado.');
-            });
-            audioElement.addEventListener('ended', () => {
-                isPlaying = false;
-                restoreYouTubeVolume();
-                updateStatus();
-            });
-        }
+        // Controle de volume
+        function changeVolume() {
+            const slider = document.getElementById('volumeSlider');
+            const value = Math.round(slider.value * 100);
+            document.getElementById('volumeValue').textContent = `${value}%`;
+        }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            changeVolume();
-            loadAudioFromUrl();
-        });
+        // Carregamento do áudio
+        function loadAudioFromUrl() {
+            audioElement = new Audio(audioUrl);
+            
+            audioElement.addEventListener('canplaythrough', () => {
+                audioReady = true;
+                console.log('Arquivo mensagem.mp3 carregado e pronto para reprodução.');
+            });
+            
+            audioElement.addEventListener('error', (e) => {
+                console.error('Erro ao carregar arquivo mensagem.mp3:', e);
+                alert('Erro: Arquivo mensagem.mp3 não foi encontrado. Certifique-se de que o arquivo está na mesma pasta do HTML.');
+                audioReady = false;
+            });
+            
+            audioElement.addEventListener('play', () => {
+                isPlaying = true;
+                updateStatus();
+                console.log('Reprodução do MP3 iniciada');
+            });
+            
+            audioElement.addEventListener('ended', () => {
+                isPlaying = false;
+                restoreYouTubeVolume();
+                updateStatus();
+                console.log('Reprodução do MP3 finalizada');
+            });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (event) => {
-            if (event.code === 'Space') {
-                event.preventDefault();
-                if (isAutoPlayActive) {
-                    stopAutoPlay();
-                } else {
-                    startAutoPlay();
-                }
-            }
-            if (event.key === 'P' || event.key === 'p') {
-                playMessageOnce();
-            }
-            if (event.key === 'M' || event.key === 'm') {
-                toggleYouTubeMusic();
-            }
-        });
-    </script>
+            audioElement.addEventListener('pause', () => {
+                if (isPlaying) {
+                    isPlaying = false;
+                    restoreYouTubeVolume();
+                    updateStatus();
+                }
+            });
+
+            // Pré-carrega o arquivo
+            audioElement.preload = 'auto';
+        }
+
+        // Atalhos do teclado
+        document.addEventListener('keydown', (event) => {
+            // Previne ação padrão apenas para teclas que usamos
+            if (['Space', 'KeyP', 'KeyM'].includes(event.code)) {
+                event.preventDefault();
+            }
+            
+            switch(event.code) {
+                case 'Space':
+                    if (isAutoPlayActive) {
+                        stopAutoPlay();
+                    } else {
+                        startAutoPlay();
+                    }
+                    break;
+                case 'KeyP':
+                    playMessageOnce();
+                    break;
+                case 'KeyM':
+                    toggleYouTubeMusic();
+                    break;
+            }
+        });
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Iniciando sistema...');
+            changeVolume();
+            loadAudioFromUrl();
+            loadYouTubeAPI();
+            
+            console.log('Sistema configurado para usar apenas arquivo MP3');
+        });
+
+        // Tratamento de erros globais
+        window.addEventListener('error', function(e) {
+            console.error('Erro JavaScript:', e);
+        });
+    </script>
 </body>
 </html>
-
