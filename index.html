@@ -403,10 +403,7 @@
                 YouTube Music
             </div>
             
-            <iframe class="youtube-embed" id="youtubePlayer"
-                    src="https://music.youtube.com/playlist?list=PLw-VjHDlEOgvFl9wgJjRYpOTzN5-3sKzY&si=abc123"
-                    allowfullscreen>
-            </iframe>
+            <div id="youtubePlayer" class="youtube-embed"></div>
 
             <div class="info-cards">
                 <div class="info-card">
@@ -420,7 +417,12 @@
             </div>
         </div>
     </div>
-
+<script>
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+</script>
     <script>
         let isPlaying = false;
         let autoPlayInterval;
@@ -428,266 +430,121 @@
         let originalVolumes = new Map();
         let audioElement = null;
         let audioReady = false;
-        let youtubePlayer = null;
+     let isPlaying = false;
+let autoPlayInterval;
+let isAutoPlayActive = false;
+let audioElement = null;
+let audioReady = false;
 
-        const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
-        const audioUrl = "mensagem.mp3";
+// Variável global para o player do YouTube
+let youtubePlayer = null;
 
-        function startAutoPlay() {
-            if (!isAutoPlayActive) {
-                isAutoPlayActive = true;
-                document.getElementById('playBtn').style.display = 'none';
-                document.getElementById('stopBtn').style.display = 'inline-block';
-                document.getElementById('status').textContent = 'Tocar Automático Ativo';
-                document.getElementById('status').className = 'status playing';
-                document.getElementById('countdown').style.display = 'block';
-                
-                playMessage();
-                startCountdown();
-                autoPlayInterval = setInterval(() => {
-                    playMessage();
-                    startCountdown();
-                }, 900000);
-            }
+const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
+const audioUrl = "mensagem.mp3";
+
+// Esta função é chamada automaticamente pela API do YouTube quando o script está pronto
+function onYouTubeIframeAPIReady() {
+    console.log('API do YouTube pronta. Carregando player...');
+    youtubePlayer = new YT.Player('youtubePlayer', {
+        height: '240',
+        width: '100%',
+        playerVars: {
+            'listType': 'playlist',
+            'list': 'PLw-VjHDlEOgvFl9wgJjRYpOTzN5-3sKzY',
+            'enablejsapi': 1,
+            'autoplay': 1 // Inicia a playlist automaticamente
+        },
+        events: {
+            'onReady': onPlayerReady
         }
+    });
+}
 
-        function stopAutoPlay() {
-            if (isAutoPlayActive) {
-                isAutoPlayActive = false;
-                clearInterval(autoPlayInterval);
-                clearInterval(countdownInterval);
-                stopMessage();
-                
-                document.getElementById('playBtn').style.display = 'inline-block';
-                document.getElementById('stopBtn').style.display = 'none';
-                document.getElementById('status').textContent = 'Sistema pronto para uso';
-                document.getElementById('status').className = 'status';
-                document.getElementById('countdown').style.display = 'none';
-            }
+function onPlayerReady(event) {
+    document.getElementById('musicStatus').textContent = 'Player do YouTube carregado';
+}
+
+function lowerYouTubeVolume() {
+    if (youtubePlayer && youtubePlayer.setVolume) {
+        // Reduz o volume para 20% antes da mensagem
+        youtubePlayer.setVolume(20);
+        document.getElementById('musicStatus').textContent = 'Volume da música reduzido';
+    }
+}
+
+function restoreYouTubeVolume() {
+    if (youtubePlayer && youtubePlayer.setVolume) {
+        // Restaura o volume para 100% após a mensagem
+        youtubePlayer.setVolume(100);
+        document.getElementById('musicStatus').textContent = 'Volume da música restaurado';
+    }
+}
+
+function playMessage() {
+    if (!isPlaying) {
+        // Abaixa o volume do YouTube Music ANTES de tocar a mensagem
+        lowerYouTubeVolume();
+
+        if (audioReady && audioElement) {
+            console.log('Reproduzindo arquivo de áudio');
+            audioElement.play();
+        } else {
+            console.log('Usando síntese de voz');
+            playWithSpeechSynthesis();
         }
+    }
+}
 
-        function playMessageOnce() {
-            if (!isPlaying) {
-                playMessage();
-            }
+function playWithSpeechSynthesis() {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(mensagem);
+        utterance.lang = 'pt-BR';
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utterance.volume = parseFloat(document.getElementById('volumeSlider').value);
+
+        utterance.onstart = function() {
+            isPlaying = true;
+            updateStatus();
+        };
+
+        utterance.onend = function() {
+            isPlaying = false;
+            // Restaura o volume do YouTube Music APÓS a mensagem
+            restoreYouTubeVolume();
+            updateStatus();
+        };
+        
+        // Assegura que o evento onend será disparado corretamente
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function stopMessage() {
+    if (isPlaying) {
+        if (audioElement && !audioElement.paused) {
+            audioElement.pause();
+            audioElement.currentTime = 0;
+        } else if ('speechSynthesis' in window) {
+            speechSynthesis.cancel();
         }
+        isPlaying = false;
+        // Restaura o volume do YouTube Music se a mensagem for interrompida
+        restoreYouTubeVolume();
+        updateStatus();
+    }
+}
 
-        let countdownInterval;
-        let timeRemaining = 900;
+// Mantenha o resto do seu código igual!
+// A lógica dos botões, countdown e atalhos de teclado já está correta.
 
-        function startCountdown() {
-            timeRemaining = 900;
-            clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                timeRemaining--;
-                const minutes = Math.floor(timeRemaining / 60);
-                const seconds = timeRemaining % 60;
-                document.getElementById('timer').textContent = 
-                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                
-                if (timeRemaining <= 0) {
-                    clearInterval(countdownInterval);
-                }
-            }, 1000);
-        }
+// Apenas remova a chamada `loadAudioFromUrl()` de dentro de `DOMContentLoaded`
+// A API do YouTube já fará o trabalho de inicialização.
 
-        function loadAudioFromUrl() {
-            console.log('Carregando áudio...');
-            audioElement = new Audio();
-            audioElement.src = audioUrl;
-            audioElement.volume = parseFloat(document.getElementById('volumeSlider').value);
-            audioElement.preload = 'auto';
-            
-            audioElement.addEventListener('canplaythrough', function() {
-                audioReady = true;
-                console.log('Áudio carregado com sucesso');
-            });
-
-            audioElement.addEventListener('error', function(e) {
-                console.log('Falha no áudio, usando síntese de voz');
-                audioReady = false;
-                audioElement = null;
-            });
-
-            audioElement.addEventListener('ended', function() {
-                isPlaying = false;
-                setTimeout(() => {
-                    restoreYouTubeVolume();
-                }, 500);
-                updateStatus();
-            });
-
-            audioElement.addEventListener('play', function() {
-                isPlaying = true;
-                updateStatus();
-            });
-        }
-
-        function lowerYouTubeVolume() {
-            try {
-                // Tentar controlar o YouTube via postMessage
-                const youtubeFrame = document.getElementById('youtubePlayer');
-                if (youtubeFrame) {
-                    youtubeFrame.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                }
-                
-                // Controlar outros players de áudio
-                const mediaElements = document.querySelectorAll('audio, video');
-                mediaElements.forEach((element, index) => {
-                    if (!element.paused && element.src !== audioUrl) {
-                        originalVolumes.set(index, element.volume);
-                        element.volume = Math.max(element.volume * 0.2, 0.1);
-                    }
-                });
-                
-                document.getElementById('musicStatus').textContent = 'Música pausada para mensagem';
-            } catch (error) {
-                console.log('Não foi possível controlar o YouTube:', error);
-            }
-        }
-
-        function restoreYouTubeVolume() {
-            try {
-                const youtubeFrame = document.getElementById('youtubePlayer');
-                if (youtubeFrame) {
-                    youtubeFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                }
-                
-                const mediaElements = document.querySelectorAll('audio, video');
-                mediaElements.forEach((element, index) => {
-                    if (originalVolumes.has(index)) {
-                        element.volume = originalVolumes.get(index);
-                    }
-                });
-                
-                originalVolumes.clear();
-                document.getElementById('musicStatus').textContent = 'Música restaurada';
-            } catch (error) {
-                console.log('Não foi possível restaurar o YouTube:', error);
-            }
-        }
-
-        function playMessage() {
-            if (!isPlaying) {
-                lowerYouTubeVolume();
-                
-                if (audioReady && audioElement) {
-                    console.log('Reproduzindo arquivo de áudio');
-                    audioElement.play();
-                } else {
-                    console.log('Usando síntese de voz');
-                    playWithSpeechSynthesis();
-                }
-            }
-        }
-
-        function playWithSpeechSynthesis() {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(mensagem);
-                utterance.lang = 'pt-BR';
-                utterance.rate = 0.9;
-                utterance.pitch = 1;
-                utterance.volume = parseFloat(document.getElementById('volumeSlider').value);
-                
-                utterance.onstart = function() {
-                    isPlaying = true;
-                    updateStatus();
-                };
-                
-                utterance.onend = function() {
-                    isPlaying = false;
-                    setTimeout(() => {
-                        restoreYouTubeVolume();
-                    }, 500);
-                    updateStatus();
-                };
-                
-                speechSynthesis.speak(utterance);
-            }
-        }
-
-        function stopMessage() {
-            if (isPlaying) {
-                if (audioElement && !audioElement.paused) {
-                    audioElement.pause();
-                    audioElement.currentTime = 0;
-                } else if ('speechSynthesis' in window) {
-                    speechSynthesis.cancel();
-                }
-                isPlaying = false;
-                restoreYouTubeVolume();
-            }
-        }
-
-        function updateStatus() {
-            if (isPlaying) {
-                if (!isAutoPlayActive) {
-                    document.getElementById('status').textContent = 'Reproduzindo mensagem...';
-                } else {
-                    document.getElementById('status').textContent = 'Tocadão Ativo - Reproduzindo...';
-                }
-                document.getElementById('status').className = 'status playing';
-            } else {
-                if (!isAutoPlayActive) {
-                    document.getElementById('status').textContent = 'Sistema pronto para uso';
-                    document.getElementById('status').className = 'status';
-                } else {
-                    document.getElementById('status').textContent = 'Tocar Automático Ativo';
-                }
-            }
-        }
-
-        function changeVolume() {
-            const volume = document.getElementById('volumeSlider').value;
-            document.getElementById('volumeValue').textContent = Math.round(volume * 100) + '%';
-            
-            if (audioElement) {
-                audioElement.volume = parseFloat(volume);
-            }
-        }
-
-        function toggleYouTubeMusic() {
-            const youtubeFrame = document.getElementById('youtubePlayer');
-            if (youtubeFrame) {
-                // Alternar entre play/pause
-                youtubeFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                document.getElementById('musicStatus').textContent = 'Comando enviado ao player';
-            }
-        }
-
-        // Atalhos de teclado
-        document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space') {
-                event.preventDefault();
-                if (isAutoPlayActive) {
-                    stopAutoPlay();
-                } else {
-                    startAutoPlay();
-                }
-            } else if (event.code === 'KeyP') {
-                event.preventDefault();
-                playMessageOnce();
-            } else if (event.code === 'KeyM') {
-                event.preventDefault();
-                toggleYouTubeMusic();
-            }
-        });
-
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            loadAudioFromUrl();
-            document.getElementById('musicStatus').textContent = 'Player do YouTube carregado';
-        });
-
-        // Cleanup
-        window.addEventListener('beforeunload', function() {
-            if (isAutoPlayActive) {
-                stopAutoPlay();
-            }
-            if (isPlaying) {
-                stopMessage();
-            }
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    loadAudioFromUrl();
+});
     </script>
 </body>
 </html>
+
