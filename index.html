@@ -103,7 +103,7 @@
 
         .controls-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 1rem;
             margin: 2rem 0;
         }
@@ -349,7 +349,13 @@
                     🔊 Tocar Uma Vez
                 </button>
                 <button class="btn" onclick="toggleYouTubeMusic()">
-                    🎵 Controlar Música
+                    ⏸️ Play/Pause
+                </button>
+                <button class="btn" onclick="previousTrack()">
+                    ⏮️ Anterior
+                </button>
+                <button class="btn" onclick="nextTrack()">
+                    ⏭️ Próxima
                 </button>
             </div>
 
@@ -389,8 +395,10 @@
                         <span class="shortcut">ESPAÇO</span>
                         <span class="shortcut">P</span>
                         <span class="shortcut">M</span>
+                        <span class="shortcut">←</span>
+                        <span class="shortcut">→</span>
                     </div>
-                    <p style="margin-top: 0.5rem;">ESPAÇO = Iniciar/Parar | P = Tocar Uma Vez | M = Controlar Música</p>
+                    <p style="margin-top: 0.5rem;">ESPAÇO = Iniciar/Parar | P = Tocar Uma Vez | M = Play/Pause | ← = Anterior | → = Próxima</p>
                 </div>
             </div>
         </div>
@@ -407,8 +415,8 @@
 
             <div class="info-cards">
                 <div class="info-card">
-                    <h4>🎵 Controle Automático</h4>
-                    <p>Quando uma mensagem tocar, o volume da música será automaticamente reduzido e restaurado após o fim da mensagem.</p>
+                    <h4>🎵 Controle de Música</h4>
+                    <p>Use o player do YouTube acima para pesquisar e tocar suas músicas. Os botões abaixo controlam play/pause e navegação entre músicas.</p>
                 </div>
                 <div class="info-card">
                     <h4>⚙️ Status da Música</h4>
@@ -447,11 +455,15 @@
             youtubePlayer = new YT.Player('youtubePlayer', {
                 height: '240',
                 width: '100%',
-                videoId: 'jfKfPfyJRdk', // vídeo de exemplo - você pode alterar
                 playerVars: {
+                    'listType': 'search',
+                    'list': 'música academia treino',
                     'autoplay': 1,
                     'controls': 1,
                     'enablejsapi': 1,
+                    'rel': 1,
+                    'showinfo': 1,
+                    'modestbranding': 0,
                     'origin': window.location.origin
                 },
                 events: {
@@ -463,7 +475,9 @@
 
         function onPlayerReady(event) {
             console.log('Player do YouTube carregado com sucesso');
-            document.getElementById('musicStatus').textContent = 'Player do YouTube carregado';
+            document.getElementById('musicStatus').textContent = 'Player carregado - Use os controles para navegar';
+            // Define volume inicial
+            youtubePlayer.setVolume(70);
         }
 
         function onPlayerError(event) {
@@ -475,8 +489,8 @@
         function lowerYouTubeVolume() {
             if (youtubePlayer && typeof youtubePlayer.setVolume === 'function') {
                 try {
-                    youtubePlayer.setVolume(20);
-                    document.getElementById('musicStatus').textContent = 'Volume da música reduzido';
+                    youtubePlayer.setVolume(5); // Volume muito baixo durante mensagem
+                    document.getElementById('musicStatus').textContent = 'Volume da música reduzido para 5%';
                 } catch (e) {
                     console.log('Erro ao reduzir volume:', e);
                 }
@@ -486,8 +500,8 @@
         function restoreYouTubeVolume() {
             if (youtubePlayer && typeof youtubePlayer.setVolume === 'function') {
                 try {
-                    youtubePlayer.setVolume(100);
-                    document.getElementById('musicStatus').textContent = 'Volume da música restaurado';
+                    youtubePlayer.setVolume(70); // Volume normal
+                    document.getElementById('musicStatus').textContent = 'Volume da música restaurado para 70%';
                 } catch (e) {
                     console.log('Erro ao restaurar volume:', e);
                 }
@@ -574,6 +588,29 @@
                     }
                 } catch (e) {
                     console.log('Erro ao controlar música:', e);
+                }
+            }
+        }
+
+        // Funções de controle de música
+        function nextTrack() {
+            if (youtubePlayer && typeof youtubePlayer.nextVideo === 'function') {
+                try {
+                    youtubePlayer.nextVideo();
+                    document.getElementById('musicStatus').textContent = 'Próxima música';
+                } catch (e) {
+                    console.log('Erro ao pular música:', e);
+                }
+            }
+        }
+
+        function previousTrack() {
+            if (youtubePlayer && typeof youtubePlayer.previousVideo === 'function') {
+                try {
+                    youtubePlayer.previousVideo();
+                    document.getElementById('musicStatus').textContent = 'Música anterior';
+                } catch (e) {
+                    console.log('Erro ao voltar música:', e);
                 }
             }
         }
@@ -669,7 +706,7 @@
         // Atalhos do teclado
         document.addEventListener('keydown', (event) => {
             // Previne ação padrão apenas para teclas que usamos
-            if (['Space', 'KeyP', 'KeyM'].includes(event.code)) {
+            if (['Space', 'KeyP', 'KeyM', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
                 event.preventDefault();
             }
             
@@ -686,6 +723,12 @@
                     break;
                 case 'KeyM':
                     toggleYouTubeMusic();
+                    break;
+                case 'ArrowLeft':
+                    previousTrack();
+                    break;
+                case 'ArrowRight':
+                    nextTrack();
                     break;
             }
         });
