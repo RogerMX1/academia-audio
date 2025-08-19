@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academia Limpa - Mensagem de Áudio</title>
+    <title>Academia Performance - Sistema de Mensagens</title>
     <style>
         * {
             margin: 0;
@@ -12,515 +12,682 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 30%, #2c2c2c 60%, #000000 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #000000;
+            color: #FFD700;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #FFD700;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
-        .container {
-            text-align: center;
-            padding: 40px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 25px 45px rgba(255, 215, 0, 0.3);
-            border: 2px solid rgba(255, 215, 0, 0.4);
-            max-width: 600px;
-            width: 90%;
-            animation: fadeIn 1s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .logo {
-            font-size: 3em;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-
-        .controls {
-            margin: 30px 0;
-        }
-
-        .play-btn {
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            border: none;
-            color: #000000;
-            font-size: 1.5em;
-            font-weight: bold;
-            padding: 20px 40px;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.4);
-            margin: 10px;
-            min-width: 200px;
-        }
-
-        .play-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 25px rgba(255, 215, 0, 0.6);
-            background: linear-gradient(45deg, #FFA500, #FFD700);
-        }
-
-        .play-btn:active {
-            transform: translateY(0px);
-        }
-
-        .stop-btn {
-            background: linear-gradient(45deg, #2c2c2c, #000000);
-            color: #FFD700;
-            border: 2px solid #FFD700;
-        }
-
-        .stop-btn:hover {
-            background: linear-gradient(45deg, #000000, #2c2c2c);
-            box-shadow: 0 15px 25px rgba(255, 215, 0, 0.3);
-        }
-
-        .message-text {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 25px;
-            border-radius: 15px;
-            margin: 20px 0;
-            line-height: 1.6;
-            font-size: 1.1em;
-            border-left: 4px solid #FFD700;
-            color: #FFD700;
-        }
-
-        .volume-control {
-            margin: 20px 0;
-        }
-
-        .volume-control input {
-            width: 200px;
-            margin: 0 10px;
-        }
-
-        .status {
-            margin-top: 20px;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-
-        .playing {
-            color: #FFD700;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0.5; }
-        }
-
-        .floating-icons {
-            position: absolute;
+        .bg-gradient {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
+            background: radial-gradient(ellipse at center, #1a1a1a 0%, #2c2c2c 35%, #000000 100%);
+            z-index: -2;
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 215, 0, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 215, 0, 0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
             z-index: -1;
+            animation: gridMove 20s linear infinite;
         }
 
-        .icon {
-            position: absolute;
-            color: rgba(255, 215, 0, 0.2);
-            font-size: 2em;
-            animation: float 6s ease-in-out infinite;
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            align-items: start;
         }
 
-        .footer {
-            margin-top: 30px;
-            font-size: 0.9em;
-            opacity: 0.8;
+        .main-panel {
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(20px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            color: #000000;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888888;
+            font-size: 1rem;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .btn {
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            color: #FFD700;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 60px;
+        }
+
+        .btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateY(-1px);
+            border-color: rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+            border: none;
+            color: #000000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%);
+            border: none;
+            color: #FFD700;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 20, 60, 0.4);
+        }
+
+        .volume-section {
+            background: rgba(10, 10, 10, 0.6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .volume-label {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #FFD700;
+        }
+
+        .volume-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFD700;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.4);
+        }
+
+        .status-section {
+            background: rgba(10, 10, 10, 0.6);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .status {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .countdown {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #FFD700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .playing {
+            animation: pulse-status 2s infinite;
+        }
+
+        @keyframes pulse-status {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .youtube-panel {
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .youtube-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            color: #ff0000;
+            font-weight: 600;
+        }
+
+        .youtube-embed {
+            width: 100%;
+            height: 240px;
+            border: none;
+            border-radius: 12px;
+            background: #000;
+        }
+
+        .info-cards {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .info-card {
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .info-card h4 {
+            color: #FFD700;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-card p {
+            color: #CCCCCC;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .shortcuts {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .shortcut {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            color: #FFD700;
+            font-weight: 600;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .youtube-panel {
+                position: static;
+            }
+        }
+
+        .message-preview {
+            background: rgba(10, 10, 10, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        .message-preview h3 {
+            color: #FFD700;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .message-text {
+            color: #CCCCCC;
+            line-height: 1.6;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <div class="floating-icons">
-        <div class="icon" style="top: 10%; left: 10%; animation-delay: 0s;">💪</div>
-        <div class="icon" style="top: 20%; right: 10%; animation-delay: 1s;">🏋️</div>
-        <div class="icon" style="top: 60%; left: 5%; animation-delay: 2s;">🧹</div>
-        <div class="icon" style="bottom: 20%; right: 5%; animation-delay: 3s;">✨</div>
-        <div class="icon" style="bottom: 10%; left: 15%; animation-delay: 4s;">🏃</div>
-    </div>
-
+    <div class="bg-gradient"></div>
+    <div class="grid-overlay"></div>
+    
     <div class="container">
-        <div class="logo">🏋️‍♂️</div>
-        <h1>Academia Performance</h1>
-        
-        <div class="controls">
-            <button class="play-btn" id="playBtn" onclick="startAutoPlay()">
-                🔊 Iniciar Tocadão Automático
-            </button>
-            <button class="play-btn stop-btn" id="stopBtn" onclick="stopAutoPlay()" style="display: none;">
-                ⏹️ Parar Tocadão
-            </button>
-        </div>
+        <div class="main-panel">
+            <div class="header">
+                <div class="logo">🏋️‍♂️</div>
+                <h1 class="title">Academia Performance</h1>
+                <p class="subtitle">Sistema de Mensagens Automáticas</p>
+            </div>
 
-        <div class="controls">
-            <button class="play-btn" id="playOnceBtn" onclick="playMessageOnce()" style="background: linear-gradient(45deg, #2c2c2c, #000000); color: #FFD700; border: 2px solid #FFD700;">
-                ▶️ Tocar Uma Vez
-            </button>
-        </div>
+            <div class="controls-grid">
+                <button class="btn btn-primary" id="playBtn" onclick="startAutoPlay()">
+                    ▶️ Iniciar Automático
+                </button>
+                <button class="btn btn-danger" id="stopBtn" onclick="stopAutoPlay()" style="display: none;">
+                    ⏹️ Parar Automático
+                </button>
+                <button class="btn" id="playOnceBtn" onclick="playMessageOnce()">
+                    🔊 Tocar Uma Vez
+                </button>
+                <button class="btn" onclick="toggleYouTubeMusic()">
+                    🎵 Controlar Música
+                </button>
+            </div>
 
+            <div class="volume-section">
+                <div class="volume-label">Volume da Mensagem</div>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.8" onchange="changeVolume()">
+                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; color: #888; font-size: 0.85rem;">
+                    <span>0%</span>
+                    <span id="volumeValue">80%</span>
+                    <span>100%</span>
+                </div>
+            </div>
 
+            <div class="status-section">
+                <div class="status" id="status">Sistema pronto para uso</div>
+                <div id="countdown" style="display: none;">
+                    <div style="color: #888; font-size: 0.9rem; margin-bottom: 0.5rem;">Próxima mensagem em:</div>
+                    <div class="countdown" id="timer">15:00</div>
+                </div>
+            </div>
 
-        <div class="volume-control">
-            <label>Volume: </label>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.8" onchange="changeVolume()">
-            <span id="volumeValue">80%</span>
-        </div>
+            <div class="message-preview">
+                <h3>📢 Mensagem Atual</h3>
+                <div class="message-text">
+                    "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!"
+                </div>
+            </div>
 
-        <div class="status" id="status">Pronto para iniciar o tocadão automático</div>
-
-        <div id="countdown" style="font-size: 1.5em; margin: 15px 0; color: #FFD700; display: none;">
-            Próxima reprodução em: <span id="timer">15:00</span>
-        </div>
-
-        <div class="message-text">
-            <strong>🎵 Sistema de Mensagens Automáticas:</strong><br><br>
-            
-            <strong>🔄 Tocadão Automático:</strong><br>
-            Toca a mensagem imediatamente e depois a cada 15 minutos automaticamente usando síntese de voz em português.<br><br>
-            
-            <strong>📢 Mensagem:</strong><br>
-            "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!"<br><br>
-            
-            <div id="audioStatus" style="color: #FFD700; font-weight: bold; margin-top: 10px;">
-                Status: Sistema pronto - usando síntese de voz em português
+            <div class="info-cards">
+                <div class="info-card">
+                    <h4>🎯 Como Funciona</h4>
+                    <p>O sistema toca a mensagem imediatamente e depois repete automaticamente a cada 15 minutos. O áudio do YouTube Music será automaticamente reduzido durante a mensagem.</p>
+                </div>
+                <div class="info-card">
+                    <h4>⌨️ Atalhos</h4>
+                    <div class="shortcuts">
+                        <span class="shortcut">ESPAÇO</span>
+                        <span class="shortcut">P</span>
+                        <span class="shortcut">M</span>
+                    </div>
+                    <p style="margin-top: 0.5rem;">ESPAÇO = Iniciar/Parar | P = Tocar Uma Vez | M = Controlar Música</p>
+                </div>
             </div>
         </div>
 
-        <div class="footer">
-            💡 Para usar: hospede este arquivo em qualquer serviço web gratuito<br>
-            ⌨️ Atalhos: ESPAÇO = Iniciar/Parar Tocadão | P = Tocar Uma Vez<br>
-            🔄 Tocadão: Reproduz a cada 15 minutos automaticamente
+        <div class="youtube-panel">
+            <div class="youtube-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                YouTube Music
+            </div>
+            
+            <iframe class="youtube-embed" id="youtubePlayer"
+                    src="https://music.youtube.com/playlist?list=PLw-VjHDlEOgvFl9wgJjRYpOTzN5-3sKzY&si=abc123"
+                    allowfullscreen>
+            </iframe>
+
+            <div class="info-cards">
+                <div class="info-card">
+                    <h4>🎵 Controle Automático</h4>
+                    <p>Quando uma mensagem tocar, o volume da música será automaticamente reduzido e restaurado após o fim da mensagem.</p>
+                </div>
+                <div class="info-card">
+                    <h4>⚙️ Status da Música</h4>
+                    <p id="musicStatus">Aguardando detecção do player...</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-    let isPlaying = false;
-    let autoPlayInterval;
-    let isAutoPlayActive = false;
-    let originalVolumes = new Map();
-    let audioElement = null; // Inicialmente nulo
-    let audioReady = false; // Flag para verificar se o áudio está pronto
+        let isPlaying = false;
+        let autoPlayInterval;
+        let isAutoPlayActive = false;
+        let originalVolumes = new Map();
+        let audioElement = null;
+        let audioReady = false;
+        let youtubePlayer = null;
 
-    // Mensagem da academia
-    const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
-    
-    // URL do áudio do Dropbox
-const audioUrl = "mensagem.mp3";   
-    // A tag "&raw=1" no final é crucial para que o navegador consiga acessar o arquivo diretamente.
+        const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
+        const audioUrl = "mensagem.mp3";
 
-    function startAutoPlay() {
-        if (!isAutoPlayActive) {
-            isAutoPlayActive = true;
-            document.getElementById('playBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'inline-block';
-            document.getElementById('status').textContent = 'Tocadão Automático Ativo';
-            document.getElementById('status').className = 'status playing';
-            document.getElementById('countdown').style.display = 'block';
-            
-            // Tocar imediatamente
-            playMessage();
-            
-            // Configurar timer para repetir a cada 15 minutos (900000 ms)
-            startCountdown();
-            autoPlayInterval = setInterval(() => {
+        function startAutoPlay() {
+            if (!isAutoPlayActive) {
+                isAutoPlayActive = true;
+                document.getElementById('playBtn').style.display = 'none';
+                document.getElementById('stopBtn').style.display = 'inline-block';
+                document.getElementById('status').textContent = 'Tocar Automático Ativo';
+                document.getElementById('status').className = 'status playing';
+                document.getElementById('countdown').style.display = 'block';
+                
                 playMessage();
                 startCountdown();
-            }, 900000); // 15 minutos
+                autoPlayInterval = setInterval(() => {
+                    playMessage();
+                    startCountdown();
+                }, 900000);
+            }
         }
-    }
 
-    function stopAutoPlay() {
-        if (isAutoPlayActive) {
-            isAutoPlayActive = false;
-            clearInterval(autoPlayInterval);
-            clearInterval(countdownInterval);
-            
-            // Parar o áudio, seja ele síntese de voz ou arquivo
-            stopMessage();
-            
-            document.getElementById('playBtn').style.display = 'inline-block';
-            document.getElementById('stopBtn').style.display = 'none';
-            document.getElementById('status').textContent = 'Tocadão Automático Parado';
-            document.getElementById('status').className = 'status';
-            document.getElementById('countdown').style.display = 'none';
-        }
-    }
-
-    function playMessageOnce() {
-        if (!isPlaying) {
-            playMessage();
-        }
-    }
-
-    let countdownInterval;
-    let timeRemaining = 900; // 15 minutos em segundos
-
-    function startCountdown() {
-        timeRemaining = 900; // Reset para 15 minutos
-        
-        clearInterval(countdownInterval);
-        countdownInterval = setInterval(() => {
-            timeRemaining--;
-            
-            const minutes = Math.floor(timeRemaining / 60);
-            const seconds = timeRemaining % 60;
-            
-            document.getElementById('timer').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeRemaining <= 0) {
+        function stopAutoPlay() {
+            if (isAutoPlayActive) {
+                isAutoPlayActive = false;
+                clearInterval(autoPlayInterval);
                 clearInterval(countdownInterval);
-            }
-        }, 1000);
-    }
-    
-    // NOVO: Função para carregar o áudio do ElevenLabs
-    function loadAudioFromUrl() {
-        console.log('Iniciando o carregamento do áudio ElevenLabs...');
-        audioElement = new Audio();
-        audioElement.src = audioUrl;
-        audioElement.volume = parseFloat(document.getElementById('volumeSlider').value);
-        audioElement.preload = 'auto'; // 'auto' é melhor que 'metadata' para garantir que o áudio seja carregado
-        
-        audioElement.addEventListener('canplaythrough', function() {
-            audioReady = true;
-            console.log('✅ Áudio ElevenLabs carregado e pronto para reprodução.');
-            document.getElementById('audioStatus').textContent = 'Status: ✅ Áudio ElevenLabs carregado com sucesso';
-            document.getElementById('audioStatus').style.color = '#4CAF50';
-        });
-
-        audioElement.addEventListener('error', function(e) {
-            console.error('❌ Erro ao carregar o áudio do Dropbox:', e);
-            audioReady = false;
-            audioElement = null; // Reinicia o elemento
-            document.getElementById('audioStatus').textContent = 'Status: ❌ Falha no áudio - usando síntese de voz';
-            document.getElementById('audioStatus').style.color = '#f44336';
-        });
-
-        audioElement.addEventListener('ended', function() {
-            console.log('Reprodução do áudio finalizada.');
-            isPlaying = false;
-            setTimeout(() => {
-                restoreOtherPlayersVolume();
-            }, 500);
-            if (!isAutoPlayActive) {
-                document.getElementById('status').textContent = 'Mensagem finalizada';
+                stopMessage();
+                
+                document.getElementById('playBtn').style.display = 'inline-block';
+                document.getElementById('stopBtn').style.display = 'none';
+                document.getElementById('status').textContent = 'Sistema pronto para uso';
                 document.getElementById('status').className = 'status';
-            } else {
-                document.getElementById('status').textContent = 'Tocadão Automático Ativo';
+                document.getElementById('countdown').style.display = 'none';
             }
-        });
+        }
 
-        audioElement.addEventListener('play', function() {
-            isPlaying = true;
-            if (!isAutoPlayActive) {
-                document.getElementById('status').textContent = 'Reproduzindo mensagem da academia...';
-            } else {
-                document.getElementById('status').textContent = 'Tocadão Ativo - Reproduzindo...';
+        function playMessageOnce() {
+            if (!isPlaying) {
+                playMessage();
             }
-            document.getElementById('status').className = 'status playing';
-        });
+        }
 
-    }
+        let countdownInterval;
+        let timeRemaining = 900;
 
-    function lowerOtherPlayersVolume() {
-        try {
-            const mediaElements = document.querySelectorAll('audio, video');
-            mediaElements.forEach((element, index) => {
-                // Apenas se o elemento estiver tocando e não for o nosso
-                if (!element.paused && element.src !== audioUrl) {
-                    originalVolumes.set(index, element.volume);
-                    element.volume = Math.max(element.volume * 0.2, 0.1);
+        function startCountdown() {
+            timeRemaining = 900;
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                timeRemaining--;
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                document.getElementById('timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownInterval);
                 }
-            });
-            if (window.parent !== window) {
-                window.parent.postMessage({ type: 'LOWER_VOLUME', source: 'academia-audio' }, '*');
-            }
-        } catch (error) {
-            console.log('Não foi possível controlar outros players:', error);
+            }, 1000);
         }
-    }
 
-    function restoreOtherPlayersVolume() {
-        try {
-            const mediaElements = document.querySelectorAll('audio, video');
-            mediaElements.forEach((element, index) => {
-                if (originalVolumes.has(index)) {
-                    element.volume = originalVolumes.get(index);
-                }
-            });
-            originalVolumes.clear();
-            if (window.parent !== window) {
-                window.parent.postMessage({ type: 'RESTORE_VOLUME', source: 'academia-audio' }, '*');
-            }
-        } catch (error) {
-            console.log('Não foi possível restaurar volume dos outros players:', error);
-        }
-    }
-
-    function playMessage() {
-        if (!isPlaying) {
-            lowerOtherPlayersVolume();
-            if (audioReady && audioElement) {
-                console.log('Reproduzindo áudio do arquivo.');
-                audioElement.play();
-            } else {
-                console.log('Áudio do arquivo não está pronto. Usando síntese de voz.');
-                playWithSpeechSynthesis();
-            }
-        }
-    }
-
-    function playWithSpeechSynthesis() {
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(mensagem);
-            utterance.lang = 'pt-BR';
-            utterance.rate = 0.9;
-            utterance.pitch = 1;
-            utterance.volume = parseFloat(document.getElementById('volumeSlider').value);
+        function loadAudioFromUrl() {
+            console.log('Carregando áudio...');
+            audioElement = new Audio();
+            audioElement.src = audioUrl;
+            audioElement.volume = parseFloat(document.getElementById('volumeSlider').value);
+            audioElement.preload = 'auto';
             
-            utterance.onstart = function() {
+            audioElement.addEventListener('canplaythrough', function() {
+                audioReady = true;
+                console.log('Áudio carregado com sucesso');
+            });
+
+            audioElement.addEventListener('error', function(e) {
+                console.log('Falha no áudio, usando síntese de voz');
+                audioReady = false;
+                audioElement = null;
+            });
+
+            audioElement.addEventListener('ended', function() {
+                isPlaying = false;
+                setTimeout(() => {
+                    restoreYouTubeVolume();
+                }, 500);
+                updateStatus();
+            });
+
+            audioElement.addEventListener('play', function() {
                 isPlaying = true;
+                updateStatus();
+            });
+        }
+
+        function lowerYouTubeVolume() {
+            try {
+                // Tentar controlar o YouTube via postMessage
+                const youtubeFrame = document.getElementById('youtubePlayer');
+                if (youtubeFrame) {
+                    youtubeFrame.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                }
+                
+                // Controlar outros players de áudio
+                const mediaElements = document.querySelectorAll('audio, video');
+                mediaElements.forEach((element, index) => {
+                    if (!element.paused && element.src !== audioUrl) {
+                        originalVolumes.set(index, element.volume);
+                        element.volume = Math.max(element.volume * 0.2, 0.1);
+                    }
+                });
+                
+                document.getElementById('musicStatus').textContent = 'Música pausada para mensagem';
+            } catch (error) {
+                console.log('Não foi possível controlar o YouTube:', error);
+            }
+        }
+
+        function restoreYouTubeVolume() {
+            try {
+                const youtubeFrame = document.getElementById('youtubePlayer');
+                if (youtubeFrame) {
+                    youtubeFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                }
+                
+                const mediaElements = document.querySelectorAll('audio, video');
+                mediaElements.forEach((element, index) => {
+                    if (originalVolumes.has(index)) {
+                        element.volume = originalVolumes.get(index);
+                    }
+                });
+                
+                originalVolumes.clear();
+                document.getElementById('musicStatus').textContent = 'Música restaurada';
+            } catch (error) {
+                console.log('Não foi possível restaurar o YouTube:', error);
+            }
+        }
+
+        function playMessage() {
+            if (!isPlaying) {
+                lowerYouTubeVolume();
+                
+                if (audioReady && audioElement) {
+                    console.log('Reproduzindo arquivo de áudio');
+                    audioElement.play();
+                } else {
+                    console.log('Usando síntese de voz');
+                    playWithSpeechSynthesis();
+                }
+            }
+        }
+
+        function playWithSpeechSynthesis() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(mensagem);
+                utterance.lang = 'pt-BR';
+                utterance.rate = 0.9;
+                utterance.pitch = 1;
+                utterance.volume = parseFloat(document.getElementById('volumeSlider').value);
+                
+                utterance.onstart = function() {
+                    isPlaying = true;
+                    updateStatus();
+                };
+                
+                utterance.onend = function() {
+                    isPlaying = false;
+                    setTimeout(() => {
+                        restoreYouTubeVolume();
+                    }, 500);
+                    updateStatus();
+                };
+                
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function stopMessage() {
+            if (isPlaying) {
+                if (audioElement && !audioElement.paused) {
+                    audioElement.pause();
+                    audioElement.currentTime = 0;
+                } else if ('speechSynthesis' in window) {
+                    speechSynthesis.cancel();
+                }
+                isPlaying = false;
+                restoreYouTubeVolume();
+            }
+        }
+
+        function updateStatus() {
+            if (isPlaying) {
                 if (!isAutoPlayActive) {
-                    document.getElementById('status').textContent = 'Reproduzindo mensagem da academia...';
+                    document.getElementById('status').textContent = 'Reproduzindo mensagem...';
                 } else {
                     document.getElementById('status').textContent = 'Tocadão Ativo - Reproduzindo...';
                 }
                 document.getElementById('status').className = 'status playing';
-            };
-            
-            utterance.onend = function() {
-                isPlaying = false;
-                setTimeout(() => {
-                    restoreOtherPlayersVolume();
-                }, 500);
+            } else {
                 if (!isAutoPlayActive) {
-                    document.getElementById('status').textContent = 'Mensagem finalizada';
+                    document.getElementById('status').textContent = 'Sistema pronto para uso';
                     document.getElementById('status').className = 'status';
                 } else {
-                    document.getElementById('status').textContent = 'Tocadão Automático Ativo';
+                    document.getElementById('status').textContent = 'Tocar Automático Ativo';
                 }
-            };
-            
-            utterance.onerror = function() {
-                alert('Erro ao reproduzir a mensagem. Tente novamente.');
-                isPlaying = false;
-                restoreOtherPlayersVolume();
-            };
-            
-            speechSynthesis.speak(utterance);
-        } else {
-            alert('Seu navegador não suporta síntese de fala.');
-        }
-    }
-
-    function stopMessage() {
-        if (isPlaying) {
-            if (audioElement && !audioElement.paused) {
-                audioElement.pause();
-                audioElement.currentTime = 0;
-            } else if ('speechSynthesis' in window) {
-                speechSynthesis.cancel();
             }
-            isPlaying = false;
-            restoreOtherPlayersVolume();
         }
-    }
 
-    function changeVolume() {
-        const volume = document.getElementById('volumeSlider').value;
-        document.getElementById('volumeValue').textContent = Math.round(volume * 100) + '%';
-        
-        if (audioElement) {
-            audioElement.volume = parseFloat(volume);
+        function changeVolume() {
+            const volume = document.getElementById('volumeSlider').value;
+            document.getElementById('volumeValue').textContent = Math.round(volume * 100) + '%';
+            
+            if (audioElement) {
+                audioElement.volume = parseFloat(volume);
+            }
         }
-        
-        // Se estiver tocando com síntese, o volume não pode ser alterado dinamicamente
-        // Mas a próxima reprodução usará o novo valor
-    }
 
-    // Teclas de atalho
-    document.addEventListener('keydown', function(event) {
-        if (event.code === 'Space') {
-            event.preventDefault();
+        function toggleYouTubeMusic() {
+            const youtubeFrame = document.getElementById('youtubePlayer');
+            if (youtubeFrame) {
+                // Alternar entre play/pause
+                youtubeFrame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                document.getElementById('musicStatus').textContent = 'Comando enviado ao player';
+            }
+        }
+
+        // Atalhos de teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                if (isAutoPlayActive) {
+                    stopAutoPlay();
+                } else {
+                    startAutoPlay();
+                }
+            } else if (event.code === 'KeyP') {
+                event.preventDefault();
+                playMessageOnce();
+            } else if (event.code === 'KeyM') {
+                event.preventDefault();
+                toggleYouTubeMusic();
+            }
+        });
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAudioFromUrl();
+            document.getElementById('musicStatus').textContent = 'Player do YouTube carregado';
+        });
+
+        // Cleanup
+        window.addEventListener('beforeunload', function() {
             if (isAutoPlayActive) {
                 stopAutoPlay();
-            } else {
-                startAutoPlay();
             }
-        } else if (event.code === 'KeyP') {
-            event.preventDefault();
-            playMessageOnce();
-        }
-    });
-
-    // Parar automaticamente se a página for fechada
-    window.addEventListener('beforeunload', function() {
-        if (isAutoPlayActive) {
-            stopAutoPlay();
-        }
-        if (isPlaying) {
-            stopMessage();
-        }
-    });
-
-    // Manter a página ativa para não pausar o timer
-    let wakeLock = null;
-    async function requestWakeLock() {
-        try {
-            if ('wakeLock' in navigator) {
-                wakeLock = await navigator.wakeLock.request('screen');
+            if (isPlaying) {
+                stopMessage();
             }
-        } catch (err) {
-            console.log('Wake Lock não suportado:', err);
-        }
-    }
-
-    // Ativar sistema quando a página carregar
-    document.addEventListener('DOMContentLoaded', function() {
-        requestWakeLock();
-        loadAudioFromUrl(); // Chamar a função para carregar o áudio no início
-    });
-            </script>
+        });
+    </script>
 </body>
-
 </html>
