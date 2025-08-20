@@ -557,279 +557,208 @@
 
     <script>
         // Variáveis globais
-        let isPlaying = false;
-        let autoPlayInterval;
-        let countdownInterval;
-        let isAutoPlayActive = false;
-        let audioElement = null;
-        let audioReady = false;
-        let youtubePlayer = null;
-        const YOUTUBE_API_KEY = 'AIzaSyBaBDJzBfcxjwOl0-6zp2unI0PzxQYEgZg';
+let isPlaying = false;
+let autoPlayInterval;
+let countdownInterval;
+let isAutoPlayActive = false;
+let audioElement = null;
+let audioReady = false;
+let youtubePlayer = null;
+let currentPlaylist = [];
+let videoQueue = [];
+let isSearching = false;
 
-        const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
-        const audioUrl = "mensagem.mp3";
+// ⭐ Sua chave de API do YouTube real e válida ⭐
+// Substitua este valor pela sua chave
+const YOUTUBE_API_KEY = 'SUA_CHAVE_DE_API_DO_YOUTUBE_AQUI';
 
-        // Carrega a API do YouTube
-        function loadYouTubeAPI() {
-            if (typeof YT === 'undefined') {
-                const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                const firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-            }
+const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
+const audioUrl = "mensagem.mp3";
+
+// Carrega a API do YouTube
+function loadYouTubeAPI() {
+    if (typeof YT === 'undefined') {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+}
+
+// Callback da API do YouTube
+window.onYouTubeIframeAPIReady = function() {
+    console.log('API do YouTube pronta. Carregando player...');
+    youtubePlayer = new YT.Player('youtubePlayer', {
+        height: '240',
+        width: '100%',
+        playerVars: {
+            'autoplay': 1,
+            'controls': 1,
+            'enablejsapi': 1,
+            'rel': 0,
+            'showinfo': 0,
+            'modestbranding': 1,
+            'origin': window.location.origin,
+            'iv_load_policy': 3 // Desativa anotações
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onError': onPlayerError,
+            'onStateChange': onPlayerStateChange
         }
+    });
+};
 
-        // Callback da API do YouTube
-        window.onYouTubeIframeAPIReady = function() {
-            console.log('API do YouTube pronta. Carregando player...');
-            youtubePlayer = new YT.Player('youtubePlayer', {
-                height: '240',
-                width: '100%',
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 1,
-                    'enablejsapi': 1,
-                    'rel': 1,
-                    'showinfo': 1,
-                    'modestbranding': 0,
-                    'origin': window.location.origin
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onError': onPlayerError
-                }
-            });
-        };
+function onPlayerReady(event) {
+    console.log('Player do YouTube carregado com sucesso');
+    document.getElementById('musicStatus').textContent = 'Player carregado - Use os controles para navegar';
+    youtubePlayer.setVolume(70);
 
-        function onPlayerReady(event) {
-            console.log('Player do YouTube carregado com sucesso');
-            document.getElementById('musicStatus').textContent = 'Player carregado - Use os controles para navegar';
-            // Define volume inicial
-            youtubePlayer.setVolume(70);
+    // ⭐ Inicia a "rádio" automaticamente com uma busca padrão ⭐
+    const defaultSearch = 'workout music'; // Ou o artista que você preferir
+    searchAndPlay(defaultSearch);
+}
+
+function onPlayerError(event) {
+    console.error('Erro no player do YouTube:', event.data);
+    document.getElementById('musicStatus').textContent = 'Erro ao carregar música';
+}
+
+// ⭐ LÓGICA PRINCIPAL: Manipula a mudança de estado do player ⭐
+function onPlayerStateChange(event) {
+    // Se a música atual terminou
+    if (event.data === YT.PlayerState.ENDED) {
+        console.log('Música do YouTube terminou.');
+        // Tenta tocar a próxima música da fila
+        if (videoQueue.length > 0) {
+            const nextVideoId = videoQueue.shift();
+            youtubePlayer.loadVideoById(nextVideoId);
+        } else {
+            console.log('Fila de vídeos vazia. Iniciando nova busca...');
+            // Inicia uma nova busca para continuar a "rádio"
+            searchAndPlay(document.getElementById('searchInput').value || 'workout music', true);
         }
+    } else if (event.data === YT.PlayerState.PLAYING) {
+        // Se a música começou a tocar, atualiza o status
+        const currentVideoData = youtubePlayer.getVideoData();
+        document.getElementById('musicStatus').textContent = `🎵 Tocando: ${currentVideoData.title}`;
+    }
+}
 
-        function onPlayerError(event) {
-            console.error('Erro no player do YouTube:', event.data);
-            document.getElementById('musicStatus').textContent = 'Erro ao carregar música';
-        }
+// ⭐ NOVA FUNÇÃO: Busca vídeos e toca o primeiro, enfileirando o restante ⭐
+function searchAndPlay(query, append = false) {
+    if (isSearching) return; // Evita múltiplas buscas
+    isSearching = true;
 
-        // Controle do volume da música
-        function lowerYouTubeVolume() {
-            if (youtubePlayer && typeof youtubePlayer.setVolume === 'function') {
-                try {
-                    youtubePlayer.setVolume(5); // Volume muito baixo durante mensagem
-                    document.getElementById('musicStatus').textContent = 'Volume da música reduzido para 5%';
-                } catch (e) {
-                    console.log('Erro ao reduzir volume:', e);
-                }
-            }
-        }
+    if (!append) {
+        document.getElementById('searchResultsList').innerHTML = '<div class="loading-message">🔍 Buscando músicas...</div>';
+        document.getElementById('musicStatus').textContent = 'Pesquisando no YouTube...';
+    }
 
-        function restoreYouTubeVolume() {
-            if (youtubePlayer && typeof youtubePlayer.setVolume === 'function') {
-                try {
-                    youtubePlayer.setVolume(70); // Volume normal
-                    document.getElementById('musicStatus').textContent = 'Volume da música restaurado para 70%';
-                } catch (e) {
-                    console.log('Erro ao restaurar volume:', e);
-                }
-            }
-        }
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=20&key=${YOUTUBE_API_KEY}`;
 
-        // Função principal para tocar mensagem
-        function playMessage() {
-            if (!isPlaying && audioReady && audioElement) {
-                lowerYouTubeVolume();
-                console.log('Reproduzindo arquivo de áudio MP3');
-                audioElement.volume = parseFloat(document.getElementById('volumeSlider').value);
-                audioElement.play().catch(e => {
-                    console.error('Erro ao reproduzir áudio MP3:', e);
-                    alert('Erro ao reproduzir o arquivo mensagem.mp3. Verifique se o arquivo está presente.');
-                    isPlaying = false;
-                    restoreYouTubeVolume();
-                    updateStatus();
-                });
-            } else if (!audioReady) {
-                alert('Arquivo mensagem.mp3 não foi carregado. Verifique se o arquivo está na mesma pasta.');
-            }
-        }
-
-        function stopMessage() {
-            if (isPlaying && audioElement && !audioElement.paused) {
-                audioElement.pause();
-                audioElement.currentTime = 0;
-                isPlaying = false;
-                restoreYouTubeVolume();
-                updateStatus();
-            }
-        }
-
-        // Controle do sistema automático
-        function startAutoPlay() {
-            if (!isAutoPlayActive) {
-                isAutoPlayActive = true;
-                document.getElementById('playBtn').style.display = 'none';
-                document.getElementById('stopBtn').style.display = 'flex';
+    fetch(searchUrl)
+        .then(response => {
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            if (data.items && data.items.length > 0) {
+                // Filtra para remover vídeos que já estão na fila
+                const newVideos = data.items.filter(item => !videoQueue.includes(item.id.videoId));
                 
-                // Toca imediatamente
-                playMessage();
-                
-                // Inicia contagem regressiva
-                startCountdown();
-            }
-        }
+                if (newVideos.length > 0) {
+                    const firstVideoId = newVideos[0].id.videoId;
+                    // Adiciona os IDs dos novos vídeos na fila, ignorando o primeiro
+                    const newVideoIds = newVideos.slice(1).map(item => item.id.videoId);
+                    videoQueue = videoQueue.concat(newVideoIds);
 
-        function stopAutoPlay() {
-            if (isAutoPlayActive) {
-                isAutoPlayActive = false;
-                
-                // Limpa intervalos
-                if (autoPlayInterval) clearInterval(autoPlayInterval);
-                if (countdownInterval) clearInterval(countdownInterval);
-                
-                // Para mensagem se estiver tocando
-                stopMessage();
-                
-                // Atualiza interface
-                document.getElementById('playBtn').style.display = 'flex';
-                document.getElementById('stopBtn').style.display = 'none';
-                document.getElementById('status').textContent = 'Sistema parado';
-                document.getElementById('countdown').style.display = 'none';
-            }
-        }
-
-        function playMessageOnce() {
-            playMessage();
-        }
-
-        // Controle da música do YouTube
-        function toggleYouTubeMusic() {
-            if (youtubePlayer && typeof youtubePlayer.getPlayerState === 'function') {
-                try {
-                    const state = youtubePlayer.getPlayerState();
-                    if (state === YT.PlayerState.PLAYING) {
-                        youtubePlayer.pauseVideo();
-                        document.getElementById('musicStatus').textContent = 'Música pausada';
-                    } else {
-                        youtubePlayer.playVideo();
-                        document.getElementById('musicStatus').textContent = 'Música tocando';
+                    if (!append) {
+                        youtubePlayer.loadVideoById(firstVideoId);
+                        console.log(`Iniciando "rádio" com o vídeo: ${firstVideoId}`);
                     }
-                } catch (e) {
-                    console.log('Erro ao controlar música:', e);
-                }
-            }
-        }
-
-        // Funções de controle de música
-        function nextTrack() {
-            if (youtubePlayer && typeof youtubePlayer.nextVideo === 'function') {
-                try {
-                    youtubePlayer.nextVideo();
-                    document.getElementById('musicStatus').textContent = 'Próxima música';
-                } catch (e) {
-                    console.log('Erro ao pular música:', e);
-                }
-            }
-        }
-
-        function previousTrack() {
-            if (youtubePlayer && typeof youtubePlayer.previousVideo === 'function') {
-                try {
-                    youtubePlayer.previousVideo();
-                    document.getElementById('musicStatus').textContent = 'Música anterior';
-                } catch (e) {
-                    console.log('Erro ao voltar música:', e);
-                }
-            }
-        }
-
-        // ========== FUNÇÕES DE PESQUISA DO YOUTUBE ==========
-        function searchYouTube() {
-            const query = document.getElementById('searchInput').value.trim();
-            
-            if (query === '') {
-                alert('Por favor, digite o nome de uma música ou artista.');
-                return;
-            }
-
-            // Mostra mensagem de carregamento
-            document.getElementById('searchResultsList').innerHTML = '<div class="loading-message">🔍 Buscando músicas...</div>';
-            document.getElementById('musicStatus').textContent = 'Pesquisando no YouTube...';
-
-            const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query + ' music')}&type=video&maxResults=10&key=${YOUTUBE_API_KEY}`;
-            
-            fetch(searchUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Erro HTTP: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.items && data.items.length > 0) {
-                        displaySearchResults(data.items);
-                        document.getElementById('musicStatus').textContent = `Encontradas ${data.items.length} músicas`;
-                    } else {
-                        document.getElementById('searchResultsList').innerHTML = '<div class="error-message">Nenhum resultado encontrado para "' + query + '"</div>';
-                        document.getElementById('musicStatus').textContent = 'Nenhum resultado encontrado';
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro na pesquisa do YouTube:', error);
-                    document.getElementById('searchResultsList').innerHTML = '<div class="error-message">❌ Erro na pesquisa. Verifique sua conexão com a internet ou a chave da API.</div>';
-                    document.getElementById('musicStatus').textContent = 'Erro na pesquisa';
-                });
-        }
-
-        function displaySearchResults(videos) {
-            const resultsList = document.getElementById('searchResultsList');
-            resultsList.innerHTML = '';
-
-            if (!videos || videos.length === 0) {
-                resultsList.innerHTML = '<div class="error-message">Nenhum resultado encontrado.</div>';
-                return;
-            }
-
-            videos.forEach((video, index) => {
-                const li = document.createElement('li');
-                li.classList.add('search-result-item');
-                
-                const videoTitle = video.snippet.title;
-                const videoThumbnail = video.snippet.thumbnails.default.url;
-                const videoId = video.id.videoId;
-                const channelTitle = video.snippet.channelTitle;
-
-                li.innerHTML = `
-                    <img src="${videoThumbnail}" alt="${videoTitle}" onerror="this.style.display='none'" />
-                    <div style="flex-grow: 1;">
-                        <div style="color: #FFD700; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">${videoTitle}</div>
-                        <div style="color: #888; font-size: 0.75rem;">${channelTitle}</div>
-                    </div>
-                    <button class="play-result-btn" onclick="playVideoFromSearch('${videoId}', '${videoTitle.replace(/'/g, "\\'")}')" title="Tocar esta música">
-                        ▶️
-                    </button>
-                `;
-                
-                resultsList.appendChild(li);
-            });
-        }
-
-        function playVideoFromSearch(videoId, videoTitle) {
-            if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
-                try {
-                    youtubePlayer.loadVideoById(videoId);
-                    document.getElementById('musicStatus').textContent = `🎵 Tocando: ${videoTitle}`;
-                    console.log(`Carregando música: ${videoTitle} (ID: ${videoId})`);
-                } catch (error) {
-                    console.error('Erro ao carregar vídeo:', error);
-                    document.getElementById('musicStatus').textContent = 'Erro ao carregar música';
-                    alert('Erro ao carregar a música. Tente novamente.');
+                    
+                    displaySearchResults(newVideos);
+                } else {
+                    document.getElementById('searchResultsList').innerHTML = '<div class="error-message">Nenhum resultado novo encontrado.</div>';
                 }
             } else {
-                alert('O player do YouTube não está pronto. Aguarde alguns segundos e tente novamente.');
-                document.getElementById('musicStatus').textContent = 'Player não está pronto';
+                document.getElementById('searchResultsList').innerHTML = '<div class="error-message">Nenhum resultado encontrado para "' + query + '"</div>';
             }
+            isSearching = false;
+        })
+        .catch(error => {
+            console.error('Erro na pesquisa do YouTube:', error);
+            document.getElementById('searchResultsList').innerHTML = '<div class="error-message">❌ Erro na pesquisa. Verifique sua conexão com a internet ou a chave da API.</div>';
+            document.getElementById('musicStatus').textContent = 'Erro na pesquisa';
+            isSearching = false;
+        });
+}
+
+// Função de pesquisa para o botão e Enter
+function searchYouTube() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (query === '') {
+        alert('Por favor, digite o nome de uma música ou artista.');
+        return;
+    }
+    // Limpa a fila e inicia a nova "rádio"
+    videoQueue = [];
+    searchAndPlay(query);
+}
+
+function displaySearchResults(videos) {
+    const resultsList = document.getElementById('searchResultsList');
+    if (!videos || videos.length === 0) {
+        resultsList.innerHTML = '<div class="error-message">Nenhum resultado encontrado.</div>';
+        return;
+    }
+    resultsList.innerHTML = '';
+    videos.forEach((video, index) => {
+        const li = document.createElement('li');
+        li.classList.add('search-result-item');
+        const videoTitle = video.snippet.title;
+        const videoThumbnail = video.snippet.thumbnails.default.url;
+        const videoId = video.id.videoId;
+        const channelTitle = video.snippet.channelTitle;
+        li.innerHTML = `
+            <img src="${videoThumbnail}" alt="${videoTitle}" onerror="this.style.display='none'" />
+            <div style="flex-grow: 1;">
+                <div style="color: #FFD700; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">${videoTitle}</div>
+                <div style="color: #888; font-size: 0.75rem;">${channelTitle}</div>
+            </div>
+            <button class="play-result-btn" onclick="playVideoFromSearch('${videoId}', '${videoTitle.replace(/'/g, "\\'")}')" title="Tocar esta música">
+                ▶️
+            </button>
+        `;
+        resultsList.appendChild(li);
+    });
+}
+
+function playVideoFromSearch(videoId, videoTitle) {
+    if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
+        try {
+            // Limpa a fila e toca o vídeo selecionado
+            videoQueue = [];
+            youtubePlayer.loadVideoById(videoId);
+            document.getElementById('musicStatus').textContent = `🎵 Tocando: ${videoTitle}`;
+            console.log(`Carregando música: ${videoTitle} (ID: ${videoId})`);
+        } catch (error) {
+            console.error('Erro ao carregar vídeo:', error);
+            document.getElementById('musicStatus').textContent = 'Erro ao carregar música';
+            alert('Erro ao carregar a música. Tente novamente.');
         }
+    } else {
+        alert('O player do YouTube não está pronto. Aguarde alguns segundos e tente novamente.');
+        document.getElementById('musicStatus').textContent = 'Player não está pronto';
+    }
+}
+
+
+// O restante do seu código (lowerYouTubeVolume, restoreYouTubeVolume, playMessage, etc.)
+// pode ser mantido como está, pois a lógica de rádio não interfere nestas funções.
+
+// ... (Copie o restante do seu código aqui)
 
         // Status e interface
         function updateStatus() {
@@ -1064,3 +993,4 @@
     </script>
 </body>
 </html>
+
