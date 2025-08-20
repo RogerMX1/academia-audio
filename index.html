@@ -1,4 +1,32 @@
-<!DOCTYPE html>
+// Log de status detalhado a cada 60 segundos para acompanhar a playlist
+            setInterval(() => {
+                if (musicQueue.length > 0) {
+                    const remaining = musicQueue.length - currentQueueIndex;
+                    console.log('🎵 Status da Playlist:', {
+                        'Músicas na fila': musicQueue.length,
+                        'Músicas restantes': remaining,
+                        'Índice atual': currentQueueIndex,
+                        'Último termo pesquisado': lastSearchTerm || 'Nenhum',
+                        'Gênero atual': musicGenres[currentGenreIndex],
+                        'Player pronto': youtubePlayer !== null
+                    });
+                    
+                    // Atualiza status na interface
+                    if (document.getElementById('playlistStatus')) {
+                        document.getElementById('playlistStatus').textContent = 
+                            `${remaining} músicas na fila. Sistema carregará automaticamente mais músicas relacionadas.`;
+                    }
+                }
+            }, 60000);
+
+            console.log('✅ Sistema Academia Performance inicializado com PLAYLIST AUTOMÁTICA!');
+            console.log('🎵 Recursos da playlist:');
+            console.log('   - Música contínua automática');
+            console.log('   - Gêneros variados para academia');
+            console.log('   - Músicas relacionadas baseadas na pesquisa');
+            console.log('   - Queue inteligente que nunca acaba');
+            console.log('   - Transições suaves entre músicas');
+            console.log('🏋️‍♂️ Perfeito para manter o ritmo na academia!');<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -546,6 +574,13 @@
                     <input type="text" id="searchInput" placeholder="Digite o nome da música ou artista..." />
                     <button class="btn" id="searchBtn">🔍</button>
                 </div>
+                
+                <!-- NOVO: Indicador de Playlist -->
+                <div class="info-card" style="margin: 1rem 0;">
+                    <h4>🎵 Playlist Automática Ativa</h4>
+                    <p id="playlistStatus">Sistema criará automaticamente uma sequência musical baseada no que você pesquisar, ideal para academia!</p>
+                </div>
+                
                 <div class="info-card">
                     <ul class="search-results-list" id="searchResultsList">
                         <div class="loading-message">Digite acima para pesquisar músicas...</div>
@@ -564,6 +599,12 @@
         let audioElement = null;
         let audioReady = false;
         let youtubePlayer = null;
+        let musicQueue = [];
+        let currentQueueIndex = 0;
+        let isAutoMusicEnabled = true;
+        let lastSearchTerm = '';
+        let musicGenres = ['workout', 'fitness', 'electronic', 'pop', 'rock', 'motivation'];
+        let currentGenreIndex = 0;
         const YOUTUBE_API_KEY = 'AIzaSyBaBDJzBfcxjwOl0-6zp2unI0PzxQYEgZg';
 
         const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
@@ -596,7 +637,8 @@
                 },
                 events: {
                     'onReady': onPlayerReady,
-                    'onError': onPlayerError
+                    'onError': onPlayerError,
+                    'onStateChange': onPlayerStateChange
                 }
             });
         };
@@ -606,11 +648,53 @@
             document.getElementById('musicStatus').textContent = 'Player carregado - Use os controles para navegar';
             // Define volume inicial
             youtubePlayer.setVolume(70);
+            
+            // Inicia com música de academia automática
+            setTimeout(() => {
+                if (musicQueue.length === 0) {
+                    loadGymPlaylist();
+                }
+            }, 2000);
         }
 
         function onPlayerError(event) {
             console.error('Erro no player do YouTube:', event.data);
-            document.getElementById('musicStatus').textContent = 'Erro ao carregar música';
+            document.getElementById('musicStatus').textContent = 'Erro ao carregar música - tentando próxima...';
+            
+            // Tenta próxima música da queue se houver erro
+            setTimeout(() => {
+                playNextInQueue();
+            }, 3000);
+        }
+
+        // NOVO: Detecta quando música termina para tocar a próxima
+        function onPlayerStateChange(event) {
+            const status = document.getElementById('musicStatus');
+            
+            switch(event.data) {
+                case YT.PlayerState.PLAYING:
+                    status.textContent = '🎵 Música tocando...';
+                    console.log('🎵 Música iniciou');
+                    break;
+                    
+                case YT.PlayerState.PAUSED:
+                    status.textContent = '⏸️ Música pausada';
+                    break;
+                    
+                case YT.PlayerState.ENDED:
+                    console.log('🎵 Música terminou - tocando próxima...');
+                    status.textContent = '🔄 Carregando próxima música...';
+                    
+                    // Pequeno delay antes da próxima música
+                    setTimeout(() => {
+                        playNextInQueue();
+                    }, 1500);
+                    break;
+                    
+                case YT.PlayerState.BUFFERING:
+                    status.textContent = '⏳ Carregando música...';
+                    break;
+            }
         }
 
         // Controle do volume da música
@@ -720,25 +804,38 @@
             }
         }
 
-        // Funções de controle de música
+        // Funções de controle de música melhoradas
         function nextTrack() {
-            if (youtubePlayer && typeof youtubePlayer.nextVideo === 'function') {
-                try {
-                    youtubePlayer.nextVideo();
-                    document.getElementById('musicStatus').textContent = 'Próxima música';
-                } catch (e) {
-                    console.log('Erro ao pular música:', e);
-                }
+            if (youtubePlayer) {
+                console.log('⏭️ Pulando para próxima música');
+                playNextInQueue();
             }
         }
 
         function previousTrack() {
-            if (youtubePlayer && typeof youtubePlayer.previousVideo === 'function') {
+            if (youtubePlayer && currentQueueIndex > 1) {
+                console.log('⏮️ Voltando música anterior');
+                currentQueueIndex -= 2; // Volta 2 posições para compensar o incremento
+                playNextInQueue();
+            } else {
+                console.log('⚠️ Não há música anterior na queue');
+                document.getElementById('musicStatus').textContent = 'Não há música anterior';
+            }
+        }
+
+        function toggleYouTubeMusic() {
+            if (youtubePlayer && typeof youtubePlayer.getPlayerState === 'function') {
                 try {
-                    youtubePlayer.previousVideo();
-                    document.getElementById('musicStatus').textContent = 'Música anterior';
+                    const state = youtubePlayer.getPlayerState();
+                    if (state === YT.PlayerState.PLAYING) {
+                        youtubePlayer.pauseVideo();
+                        document.getElementById('musicStatus').textContent = '⏸️ Música pausada';
+                    } else {
+                        youtubePlayer.playVideo();
+                        document.getElementById('musicStatus').textContent = '▶️ Música retomada';
+                    }
                 } catch (e) {
-                    console.log('Erro ao voltar música:', e);
+                    console.log('Erro ao controlar música:', e);
                 }
             }
         }
