@@ -309,6 +309,122 @@
             font-size: 0.9rem;
         }
 
+        .search-panel {
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(20px);
+            margin-top: 2rem;
+        }
+
+        .search-panel h3 {
+            color: #FFD700;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        #searchInput {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 8px;
+            color: #FFD700;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        
+        #searchInput::placeholder {
+            color: rgba(255, 215, 0, 0.5);
+        }
+
+        #searchInput:focus {
+            border-color: #FFD700;
+        }
+
+        .search-results-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-results-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .search-results-list::-webkit-scrollbar-track {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .search-results-list::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 215, 0, 0.5);
+            border-radius: 4px;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: rgba(255, 215, 0, 0.05);
+        }
+
+        .search-result-item img {
+            width: 60px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .search-result-item span {
+            flex-grow: 1;
+            font-size: 0.9rem;
+            color: #CCCCCC;
+        }
+        
+        .play-result-btn {
+            background: none;
+            border: none;
+            color: #FFD700;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .play-result-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .loading-message {
+            text-align: center;
+            color: #888;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        .error-message {
+            text-align: center;
+            color: #DC143C;
+            padding: 2rem;
+            font-weight: 600;
+        }
+
         @media (max-width: 968px) {
             .container {
                 grid-template-columns: 1fr;
@@ -423,6 +539,19 @@
                     <p id="musicStatus">Aguardando detecção do player...</p>
                 </div>
             </div>
+
+            <div class="search-panel">
+                <h3>🔍 Pesquisar Música</h3>
+                <div class="search-input-group">
+                    <input type="text" id="searchInput" placeholder="Digite o nome da música ou artista..." />
+                    <button class="btn" id="searchBtn">🔍</button>
+                </div>
+                <div class="info-card">
+                    <ul class="search-results-list" id="searchResultsList">
+                        <div class="loading-message">Digite acima para pesquisar músicas...</div>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -435,6 +564,7 @@
         let audioElement = null;
         let audioReady = false;
         let youtubePlayer = null;
+        const YOUTUBE_API_KEY = 'AIzaSyBaBDJzBfcxjwOl0-6zp2unI0PzxQYEgZg';
 
         const mensagem = "Atenção pessoal da Academia Performance! Vamos manter nosso espaço sempre limpo e organizado. Por favor, não joguem lixo no chão, sempre coloquem os pesos de volta no lugar após o uso, e mantenham os equipamentos organizados. Uma academia limpa é uma academia saudável para todos! Academia Performance agradece a colaboração!";
         const audioUrl = "mensagem.mp3";
@@ -456,8 +586,6 @@
                 height: '240',
                 width: '100%',
                 playerVars: {
-                    'listType': 'search',
-                    'list': 'música academia treino',
                     'autoplay': 1,
                     'controls': 1,
                     'enablejsapi': 1,
@@ -615,6 +743,94 @@
             }
         }
 
+        // ========== FUNÇÕES DE PESQUISA DO YOUTUBE ==========
+        function searchYouTube() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (query === '') {
+                alert('Por favor, digite o nome de uma música ou artista.');
+                return;
+            }
+
+            // Mostra mensagem de carregamento
+            document.getElementById('searchResultsList').innerHTML = '<div class="loading-message">🔍 Buscando músicas...</div>';
+            document.getElementById('musicStatus').textContent = 'Pesquisando no YouTube...';
+
+            const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query + ' music')}&type=video&maxResults=10&key=${YOUTUBE_API_KEY}`;
+            
+            fetch(searchUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.items && data.items.length > 0) {
+                        displaySearchResults(data.items);
+                        document.getElementById('musicStatus').textContent = `Encontradas ${data.items.length} músicas`;
+                    } else {
+                        document.getElementById('searchResultsList').innerHTML = '<div class="error-message">Nenhum resultado encontrado para "' + query + '"</div>';
+                        document.getElementById('musicStatus').textContent = 'Nenhum resultado encontrado';
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na pesquisa do YouTube:', error);
+                    document.getElementById('searchResultsList').innerHTML = '<div class="error-message">❌ Erro na pesquisa. Verifique sua conexão com a internet ou a chave da API.</div>';
+                    document.getElementById('musicStatus').textContent = 'Erro na pesquisa';
+                });
+        }
+
+        function displaySearchResults(videos) {
+            const resultsList = document.getElementById('searchResultsList');
+            resultsList.innerHTML = '';
+
+            if (!videos || videos.length === 0) {
+                resultsList.innerHTML = '<div class="error-message">Nenhum resultado encontrado.</div>';
+                return;
+            }
+
+            videos.forEach((video, index) => {
+                const li = document.createElement('li');
+                li.classList.add('search-result-item');
+                
+                const videoTitle = video.snippet.title;
+                const videoThumbnail = video.snippet.thumbnails.default.url;
+                const videoId = video.id.videoId;
+                const channelTitle = video.snippet.channelTitle;
+
+                li.innerHTML = `
+                    <img src="${videoThumbnail}" alt="${videoTitle}" onerror="this.style.display='none'" />
+                    <div style="flex-grow: 1;">
+                        <div style="color: #FFD700; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">${videoTitle}</div>
+                        <div style="color: #888; font-size: 0.75rem;">${channelTitle}</div>
+                    </div>
+                    <button class="play-result-btn" onclick="playVideoFromSearch('${videoId}', '${videoTitle.replace(/'/g, "\\'")}')" title="Tocar esta música">
+                        ▶️
+                    </button>
+                `;
+                
+                resultsList.appendChild(li);
+            });
+        }
+
+        function playVideoFromSearch(videoId, videoTitle) {
+            if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
+                try {
+                    youtubePlayer.loadVideoById(videoId);
+                    document.getElementById('musicStatus').textContent = `🎵 Tocando: ${videoTitle}`;
+                    console.log(`Carregando música: ${videoTitle} (ID: ${videoId})`);
+                } catch (error) {
+                    console.error('Erro ao carregar vídeo:', error);
+                    document.getElementById('musicStatus').textContent = 'Erro ao carregar música';
+                    alert('Erro ao carregar a música. Tente novamente.');
+                }
+            } else {
+                alert('O player do YouTube não está pronto. Aguarde alguns segundos e tente novamente.');
+                document.getElementById('musicStatus').textContent = 'Player não está pronto';
+            }
+        }
+
         // Status e interface
         function updateStatus() {
             const statusElement = document.getElementById('status');
@@ -705,6 +921,11 @@
 
         // Atalhos do teclado
         document.addEventListener('keydown', (event) => {
+            // Não intercepta teclas se o usuário estiver digitando no campo de pesquisa
+            if (event.target === document.getElementById('searchInput')) {
+                return;
+            }
+            
             // Previne ação padrão apenas para teclas que usamos
             if (['Space', 'KeyP', 'KeyM', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
                 event.preventDefault();
@@ -735,18 +956,111 @@
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Iniciando sistema...');
+            console.log('🚀 Iniciando sistema Academia Performance...');
+            
+            // Inicializa componentes principais
             changeVolume();
             loadAudioFromUrl();
             loadYouTubeAPI();
             
-            console.log('Sistema configurado para usar apenas arquivo MP3');
+            // ===== EVENT LISTENERS PARA PESQUISA =====
+            const searchBtn = document.getElementById('searchBtn');
+            const searchInput = document.getElementById('searchInput');
+            
+            // Verifica se os elementos existem antes de adicionar os listeners
+            if (searchBtn && searchInput) {
+                console.log('📱 Configurando event listeners de pesquisa...');
+                
+                // Evento de clique no botão de pesquisa
+                searchBtn.addEventListener('click', function() {
+                    console.log('🔍 Botão de pesquisa clicado');
+                    searchYouTube();
+                });
+                
+                // Evento Enter no campo de pesquisa
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        console.log('⌨️ Enter pressionado no campo de pesquisa');
+                        e.preventDefault(); // Previne envio de formulário
+                        searchYouTube();
+                    }
+                });
+                
+                // Evento de foco no campo de pesquisa
+                searchInput.addEventListener('focus', function() {
+                    console.log('🎯 Campo de pesquisa em foco');
+                    this.style.borderColor = '#FFD700';
+                });
+                
+                // Evento de perda de foco
+                searchInput.addEventListener('blur', function() {
+                    this.style.borderColor = 'rgba(255, 215, 0, 0.2)';
+                });
+                
+                // Placeholder dinâmico e interativo
+                const placeholders = [
+                    'Digite o nome da música...',
+                    'Ex: Imagine Dragons Thunder',
+                    'Ex: Ed Sheeran Perfect', 
+                    'Ex: Coldplay Viva La Vida',
+                    'Ex: Maroon 5 Sugar',
+                    'Ex: The Weeknd Blinding Lights'
+                ];
+                
+                let placeholderIndex = 0;
+                const placeholderInterval = setInterval(() => {
+                    if (searchInput.value === '' && document.activeElement !== searchInput) {
+                        searchInput.placeholder = placeholders[placeholderIndex];
+                        placeholderIndex = (placeholderIndex + 1) % placeholders.length;
+                    }
+                }, 4000);
+                
+                // Limpa intervalo quando necessário (cleanup)
+                window.addEventListener('beforeunload', () => {
+                    clearInterval(placeholderInterval);
+                });
+                
+                console.log('✅ Event listeners de pesquisa configurados com sucesso!');
+            } else {
+                console.error('❌ Elementos de pesquisa não encontrados!');
+            }
+            
+            // ===== VALIDAÇÃO FINAL =====
+            setTimeout(() => {
+                console.log('🔍 Validando inicialização...');
+                console.log('Sistema Academia Performance inicializado:', {
+                    '📄 Arquivo MP3': audioReady ? '✅ Pronto' : '⏳ Carregando',
+                    '🎥 YouTube Player': youtubePlayer ? '✅ Carregado' : '⏳ Carregando',
+                    '🔍 Pesquisa YouTube': searchBtn && searchInput ? '✅ Ativa' : '❌ Erro',
+                    '⌨️ Atalhos de teclado': '✅ Ativos',
+                    '🔊 Sistema de áudio': audioElement ? '✅ Pronto' : '❌ Erro'
+                });
+            }, 2000);
         });
 
         // Tratamento de erros globais
         window.addEventListener('error', function(e) {
-            console.error('Erro JavaScript:', e);
+            console.error('Erro JavaScript no sistema:', e.error);
         });
+
+        // Previne que o usuário saia da página acidentalmente quando o sistema estiver ativo
+        window.addEventListener('beforeunload', function(e) {
+            if (isAutoPlayActive) {
+                e.preventDefault();
+                e.returnValue = 'O sistema automático está ativo. Tem certeza que deseja sair?';
+                return e.returnValue;
+            }
+        });
+
+        // Log de status a cada 30 segundos (apenas para debug)
+        setInterval(() => {
+            console.log('Status do sistema:', {
+                audioReady: audioReady,
+                isPlaying: isPlaying,
+                isAutoPlayActive: isAutoPlayActive,
+                youtubePlayerReady: youtubePlayer !== null
+            });
+        }, 30000);
     </script>
 </body>
 </html>
