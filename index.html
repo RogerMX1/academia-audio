@@ -722,20 +722,22 @@ function displaySearchResults(videos) {
 }
 
 function playVideoFromSearch(videoId, videoTitle) {
-    if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
-        try {
+    if (youtubePlayer) {
+        // Encontra o índice do vídeo selecionado na fila de pesquisa
+        const videoIndex = videoQueue.findIndex(id => id === videoId);
+
+        // Se o vídeo estiver na fila, remove os vídeos anteriores e o atual da fila
+        if (videoIndex !== -1) {
+            videoQueue.splice(0, videoIndex + 1);
+        } else {
+            // Se o vídeo não estiver na fila (o que pode acontecer), limpa a fila
+            // para que a próxima busca de rádio funcione corretamente
             videoQueue = [];
-            youtubePlayer.loadVideoById(videoId);
-            document.getElementById('musicStatus').textContent = `🎵 Tocando: ${videoTitle}`;
-            console.log(`Carregando música: ${videoTitle} (ID: ${videoId})`);
-        } catch (error) {
-            console.error('Erro ao carregar vídeo:', error);
-            document.getElementById('musicStatus').textContent = 'Erro ao carregar música';
-            alert('Erro ao carregar a música. Tente novamente.');
         }
-    } else {
-        alert('O player do YouTube não está pronto. Aguarde alguns segundos e tente novamente.');
-        document.getElementById('musicStatus').textContent = 'Player não está pronto';
+
+        // Toca o vídeo selecionado
+        youtubePlayer.loadVideoById(videoId);
+        document.getElementById('musicStatus').textContent = `🎵 Tocando: ${videoTitle}`;
     }
 }
 
@@ -1071,6 +1073,7 @@ setInterval(() => {
     </script>
 </body>
 </html>
+
 
 
 
